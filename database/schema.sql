@@ -42,6 +42,12 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
+    CREATE TYPE user_role_enum AS ENUM ('GRID_OPERATOR', 'UTILITY_COMPANY', 'PLANT_OWNER', 'ENERGY_TRADER');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
     CREATE TYPE log_tone_enum AS ENUM ('teal', 'amber', 'blue', 'green', 'red');
 EXCEPTION
     WHEN duplicate_object THEN null;
@@ -50,6 +56,18 @@ END $$;
 -- ====================================================================
 -- 2. TABLE DEFINITIONS
 -- ====================================================================
+
+-- 2.0 Role-Based Users (Problem Statement Personas)
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR(32) PRIMARY KEY,
+    name VARCHAR(128) NOT NULL,
+    email VARCHAR(128) UNIQUE NOT NULL,
+    role user_role_enum NOT NULL DEFAULT 'GRID_OPERATOR',
+    organization VARCHAR(128) NOT NULL,
+    password_hash VARCHAR(256) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_login_at TIMESTAMPTZ
+);
 
 -- 2.1 System Parameters & Tariff Configuration
 CREATE TABLE IF NOT EXISTS system_config (
@@ -258,6 +276,7 @@ ORDER BY
 -- ====================================================================
 
 -- Enable RLS on all tables
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE system_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE technicians ENABLE ROW LEVEL SECURITY;
 ALTER TABLE assets ENABLE ROW LEVEL SECURITY;

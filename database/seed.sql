@@ -4,6 +4,15 @@
 -- Team EVILCODER: Rutvi Raval, Krish Shah, Pratham Shah, Hitarth Vyas
 -- ====================================================================
 
+-- 0. Seed Users (Problem Statement Personas)
+INSERT INTO users (id, name, email, role, organization, password_hash)
+VALUES
+    ('usr_grid_01', 'Neel Sharma', 'operator@gridsense.energy', 'GRID_OPERATOR', 'Gujarat State Load Dispatch Center (SLDC)', '$2a$12$e8q4L51N.z4yN9qV2b08YeK38PjW4XbI3vF2'),
+    ('usr_util_02', 'Priya Patel', 'utility@tatapower.com', 'UTILITY_COMPANY', 'Tata Power Transmission & Distribution', '$2a$12$e8q4L51N.z4yN9qV2b08YeK38PjW4XbI3vF2'),
+    ('usr_plant_03', 'Aarav Mehta', 'owner@adanigreen.com', 'PLANT_OWNER', 'Adani Green Energy Ltd (Kutch & Pavagada)', '$2a$12$e8q4L51N.z4yN9qV2b08YeK38PjW4XbI3vF2'),
+    ('usr_trade_04', 'Vikram Malhotra', 'trader@iexindia.com', 'ENERGY_TRADER', 'Indian Energy Exchange (IEX) Power Desk', '$2a$12$e8q4L51N.z4yN9qV2b08YeK38PjW4XbI3vF2')
+ON CONFLICT (email) DO NOTHING;
+
 -- 1. System Configuration
 INSERT INTO system_config (id, currency, tariff_rate_per_kwh, anomaly_threshold, efficiency_loss_threshold)
 VALUES ('default', 'INR', 6.00, 0.350, 0.050)

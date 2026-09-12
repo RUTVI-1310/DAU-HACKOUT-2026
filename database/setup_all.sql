@@ -42,6 +42,12 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
+    CREATE TYPE user_role_enum AS ENUM ('GRID_OPERATOR', 'UTILITY_COMPANY', 'PLANT_OWNER', 'ENERGY_TRADER');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
     CREATE TYPE log_tone_enum AS ENUM ('teal', 'amber', 'blue', 'green', 'red');
 EXCEPTION
     WHEN duplicate_object THEN null;
@@ -50,6 +56,18 @@ END $$;
 -- ====================================================================
 -- 2. TABLE DEFINITIONS
 -- ====================================================================
+
+-- 2.0 Role-Based Users (Problem Statement Personas)
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR(32) PRIMARY KEY,
+    name VARCHAR(128) NOT NULL,
+    email VARCHAR(128) UNIQUE NOT NULL,
+    role user_role_enum NOT NULL DEFAULT 'GRID_OPERATOR',
+    organization VARCHAR(128) NOT NULL,
+    password_hash VARCHAR(256) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_login_at TIMESTAMPTZ
+);
 
 -- 2.1 System Parameters & Tariff Configuration
 CREATE TABLE IF NOT EXISTS system_config (
@@ -258,6 +276,7 @@ ORDER BY
 -- ====================================================================
 
 -- Enable RLS on all tables
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE system_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE technicians ENABLE ROW LEVEL SECURITY;
 ALTER TABLE assets ENABLE ROW LEVEL SECURITY;
@@ -302,6 +321,15 @@ END $$;
 -- Complete Seed Data Script (18 Assets, Historical Telemetry & Orders)
 -- Team EVILCODER: Rutvi Raval, Krish Shah, Pratham Shah, Hitarth Vyas
 -- ====================================================================
+
+-- 0. Seed Users (Problem Statement Personas)
+INSERT INTO users (id, name, email, role, organization, password_hash)
+VALUES
+    ('usr_grid_01', 'Neel Sharma', 'operator@gridsense.energy', 'GRID_OPERATOR', 'Gujarat State Load Dispatch Center (SLDC)', '$2a$12$e8q4L51N.z4yN9qV2b08YeK38PjW4XbI3vF2'),
+    ('usr_util_02', 'Priya Patel', 'utility@tatapower.com', 'UTILITY_COMPANY', 'Tata Power Transmission & Distribution', '$2a$12$e8q4L51N.z4yN9qV2b08YeK38PjW4XbI3vF2'),
+    ('usr_plant_03', 'Aarav Mehta', 'owner@adanigreen.com', 'PLANT_OWNER', 'Adani Green Energy Ltd (Kutch & Pavagada)', '$2a$12$e8q4L51N.z4yN9qV2b08YeK38PjW4XbI3vF2'),
+    ('usr_trade_04', 'Vikram Malhotra', 'trader@iexindia.com', 'ENERGY_TRADER', 'Indian Energy Exchange (IEX) Power Desk', '$2a$12$e8q4L51N.z4yN9qV2b08YeK38PjW4XbI3vF2')
+ON CONFLICT (email) DO NOTHING;
 
 -- 1. System Configuration
 INSERT INTO system_config (id, currency, tariff_rate_per_kwh, anomaly_threshold, efficiency_loss_threshold)

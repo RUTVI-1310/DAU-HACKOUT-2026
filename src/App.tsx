@@ -4,7 +4,10 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Link, Route, Switch, Router as WouterRouter, useLocation, useParams } from 'wouter';
 import { AreaChart, Area, BarChart, Bar, CartesianGrid, LineChart, Line, ResponsiveContainer, Tooltip as ChartTooltip, XAxis, YAxis } from 'recharts';
-import { Activity, AlertTriangle, ArrowDownRight, ArrowRight, BatteryCharging, BookOpen, CalendarDays, Check, ChevronRight, CircleHelp, ClipboardCheck, CloudSun, Gauge, History, LayoutDashboard, Menu, Pause, Play, Search, Settings2, ShieldCheck, SlidersHorizontal, Sun, Thermometer, TrendingDown, UserRound, Wind, Wrench, X } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowDownRight, ArrowRight, BatteryCharging, BookOpen, Building2, CalendarDays, Check, CheckCircle2, ChevronDown, ChevronRight, CircleHelp, ClipboardCheck, CloudSun, Gauge, History, LayoutDashboard, LogIn, LogOut, Menu, Pause, Play, RefreshCw, Search, Settings2, ShieldCheck, SlidersHorizontal, Sun, Thermometer, TrendingDown, User, UserRound, Wind, Wrench, X, Zap } from 'lucide-react';
+import { AuthProvider, useAuth, DEMO_PERSONAS, type UserRole } from '@/lib/AuthContext';
+import { LoginPage } from '@/pages/LoginPage';
+import { RegisterPage } from '@/pages/RegisterPage';
 
 type AssetStatus = 'HEALTHY' | 'WATCH' | 'WARNING' | 'CRITICAL';
 type Risk = 'LOW' | 'MEDIUM' | 'HIGH';
@@ -78,6 +81,137 @@ function Badge({ children, className = '' }: { children: ReactNode; className?: 
 function SectionTitle({ eyebrow, title, detail, action }: { eyebrow: string; title: string; detail?: string; action?: ReactNode }) { return <div className="mb-5 flex items-end justify-between gap-4"><div><div className="eyebrow text-muted-foreground">{eyebrow}</div><h2 className="mt-2 text-xl font-extrabold tracking-tight">{title}</h2>{detail && <p className="mt-1 text-sm text-muted-foreground">{detail}</p>}</div>{action}</div>; }
 function Number({ value, unit }: { value: string; unit?: string }) { return <span className="mono text-2xl font-medium tracking-tight">{value}{unit && <small className="ml-1 text-xs text-muted-foreground">{unit}</small>}</span>; }
 
+function UserProfileMenu() {
+  const { user, currentRole, switchRole, logout } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [, setLocation] = useLocation();
+
+  const roleColors: Record<UserRole, string> = {
+    GRID_OPERATOR: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    UTILITY: 'bg-sky-100 text-sky-800 border-sky-300',
+    PLANT_OWNER: 'bg-amber-100 text-amber-900 border-amber-300',
+    ENERGY_TRADER: 'bg-purple-100 text-purple-900 border-purple-300',
+  };
+
+  const roleTitles: Record<UserRole, string> = {
+    GRID_OPERATOR: 'Grid Operator',
+    UTILITY: 'Utility Company',
+    PLANT_OWNER: 'Plant Owner',
+    ENERGY_TRADER: 'Energy Trader',
+  };
+
+  return (
+    <div className="relative">
+      <button
+        data-testid="button-user-profile"
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 rounded-xl border bg-[hsl(var(--card))] px-2.5 py-1.5 transition hover:bg-[hsl(var(--muted))]"
+      >
+        <div className="grid h-7 w-7 place-items-center rounded-lg bg-[hsl(var(--primary))] text-xs font-bold text-[hsl(var(--primary-foreground))] shadow-sm">
+          {user?.initials || 'NS'}
+        </div>
+        <div className="hidden text-left sm:block">
+          <div className="text-xs font-bold leading-tight">{user?.name || 'Neel Sharma'}</div>
+          <div className="mono text-[10px] text-muted-foreground">{roleTitles[currentRole] || 'Grid Operator'}</div>
+        </div>
+        <ChevronDown size={14} className={`text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="panel absolute right-0 top-12 z-50 w-72 p-4 shadow-2xl border fade-up">
+            <div className="border-b pb-3">
+              <div className="flex items-center justify-between">
+                <span className="eyebrow text-muted-foreground">Active Persona</span>
+                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${roleColors[currentRole]}`}>
+                  {roleTitles[currentRole]}
+                </span>
+              </div>
+              <div className="mt-2 text-sm font-bold text-foreground">{user?.name}</div>
+              <div className="mono text-xs text-muted-foreground truncate">{user?.email}</div>
+              <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Building2 size={12} className="text-[hsl(var(--primary))]" />
+                <span className="truncate">{user?.organization}</span>
+              </div>
+            </div>
+
+            <div className="py-3 border-b">
+              <div className="eyebrow text-muted-foreground mb-2 flex items-center justify-between">
+                <span>Switch Persona Role</span>
+                <span className="text-[10px] text-[hsl(var(--primary))] font-bold">1-Click</span>
+              </div>
+              <div className="space-y-1">
+                {(Object.entries(DEMO_PERSONAS) as [UserRole, typeof DEMO_PERSONAS[UserRole]][]).map(([rKey, persona]) => {
+                  const isSelected = currentRole === rKey;
+                  return (
+                    <button
+                      key={rKey}
+                      data-testid={`menu-persona-${rKey.toLowerCase()}`}
+                      onClick={() => {
+                        switchRole(rKey);
+                        setOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition ${
+                        isSelected
+                          ? 'bg-[hsl(var(--primary)/.1)] font-bold text-[hsl(var(--primary))]'
+                          : 'text-foreground hover:bg-[hsl(var(--muted))]'
+                      }`}
+                    >
+                      <div className="min-w-0 pr-2">
+                        <div className="truncate">{persona.name}</div>
+                        <div className="mono text-[10px] text-muted-foreground truncate">{persona.title}</div>
+                      </div>
+                      {isSelected && <CheckCircle2 size={14} className="shrink-0 text-[hsl(var(--primary))]" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="pt-3 space-y-1">
+              <button
+                data-testid="button-menu-login"
+                onClick={() => {
+                  setOpen(false);
+                  setLocation('/login');
+                }}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-foreground hover:bg-[hsl(var(--muted))]"
+              >
+                <LogIn size={13} className="text-[hsl(var(--primary))]" />
+                Switch Account / Login
+              </button>
+              <button
+                data-testid="button-menu-register"
+                onClick={() => {
+                  setOpen(false);
+                  setLocation('/register');
+                }}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-foreground hover:bg-[hsl(var(--muted))]"
+              >
+                <User size={13} className="text-[hsl(var(--accent))]" />
+                Register New Role
+              </button>
+              <button
+                data-testid="button-menu-logout"
+                onClick={() => {
+                  logout();
+                  setOpen(false);
+                  setLocation('/login');
+                }}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50"
+              >
+                <LogOut size={13} />
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function Shell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const { running, setRunning, scenario } = useDemo();
@@ -95,9 +229,16 @@ function Shell({ children }: { children: ReactNode }) {
       <div className="flex items-center justify-between px-3"><Link href="/" data-testid="link-brand" className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]"><Wind size={20} strokeWidth={2.5} /></span><span><strong className="block text-sm tracking-tight">verdant / ops</strong><small className="mono text-[9px] text-[hsl(var(--sidebar-foreground)/.6)]">RENEWABLE INTELLIGENCE</small></span></Link><button data-testid="button-close-nav" className="rounded-lg p-1 md:hidden" onClick={() => setMobileNav(false)}><X size={17} /></button></div>
       <div className="mt-10 px-3 eyebrow text-[hsl(var(--sidebar-foreground)/.45)]">Workspace</div>
       <nav className="mt-3 space-y-1">{nav.map(item => { const Icon = item.icon; const active = location === item.href || (item.href !== '/' && location.startsWith(item.href)); return <Link key={item.href} href={item.href} data-testid={`link-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`} onClick={() => setMobileNav(false)} className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition-colors ${active ? 'bg-[hsl(var(--sidebar-accent))] text-[hsl(var(--sidebar-accent-foreground))]' : 'text-[hsl(var(--sidebar-foreground)/.7)] hover:bg-[hsl(var(--sidebar-accent)/.7)] hover:text-[hsl(var(--sidebar-foreground))]'}`}><Icon size={17} strokeWidth={active ? 2.2 : 1.8} /><span className="flex-1">{item.label}</span>{item.count && <Badge className={active ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]' : 'bg-[hsl(var(--sidebar-foreground)/.12)] text-[hsl(var(--sidebar-foreground)/.7)]'}>{item.count}</Badge>}</Link>; })}</nav>
+      
+      <div className="mt-6 px-3 eyebrow text-[hsl(var(--sidebar-foreground)/.45)]">Personas & Access</div>
+      <nav className="mt-2 space-y-1">
+        <Link href="/login" data-testid="link-nav-login" onClick={() => setMobileNav(false)} className={`flex items-center gap-3 rounded-xl px-3 py-2 text-xs transition-colors ${location === '/login' ? 'bg-[hsl(var(--sidebar-accent))] text-[hsl(var(--sidebar-accent-foreground))]' : 'text-[hsl(var(--sidebar-foreground)/.7)] hover:bg-[hsl(var(--sidebar-accent)/.7)] hover:text-[hsl(var(--sidebar-foreground))]'}`}><LogIn size={15} /><span>Sign In / Switch</span></Link>
+        <Link href="/register" data-testid="link-nav-register" onClick={() => setMobileNav(false)} className={`flex items-center gap-3 rounded-xl px-3 py-2 text-xs transition-colors ${location === '/register' ? 'bg-[hsl(var(--sidebar-accent))] text-[hsl(var(--sidebar-accent-foreground))]' : 'text-[hsl(var(--sidebar-foreground)/.7)] hover:bg-[hsl(var(--sidebar-accent)/.7)] hover:text-[hsl(var(--sidebar-foreground))]'}`}><User size={15} /><span>Register Role</span></Link>
+      </nav>
+
       <div className="absolute bottom-5 left-4 right-4 rounded-xl border border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar-accent)/.55)] p-3"><div className="eyebrow text-[hsl(var(--sidebar-foreground)/.5)]">Fleet pulse</div><div className="mt-3 flex items-center gap-2 text-xs"><span className="pulse-dot h-2 w-2 rounded-full bg-[hsl(var(--accent))]" />{running ? 'Simulation streaming' : 'Telemetry synced'}<span className="ml-auto mono text-[10px] text-[hsl(var(--sidebar-foreground)/.55)]">09:42</span></div><div className="mt-3 h-1 rounded-full bg-[hsl(var(--sidebar-foreground)/.12)]"><div className="h-1 w-[72%] rounded-full bg-[hsl(var(--accent))]" /></div></div>
     </aside>
-    <div className="md:pl-[245px]"><header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b bg-[hsl(var(--background)/.9)] px-4 backdrop-blur-md md:px-8"><div className="flex items-center gap-3"><button data-testid="button-open-nav" className="rounded-lg border p-2 md:hidden" onClick={() => setMobileNav(true)}><Menu size={18} /></button><div className="hidden items-center gap-2 text-xs text-muted-foreground md:flex"><span className="h-2 w-2 rounded-full bg-emerald-500" />All systems nominal · 18 assets reporting</div><span className="eyebrow text-muted-foreground md:hidden">verdant / ops</span></div><div className="flex items-center gap-2"><button data-testid="button-global-simulation" onClick={() => setRunning(!running)} className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-bold transition ${running ? 'border-amber-300 bg-amber-50 text-amber-900' : 'bg-[hsl(var(--card))] hover:bg-[hsl(var(--muted))]'}`}>{running ? <Pause size={14} /> : <Play size={14} />}{running ? 'Pause demo' : 'Run demo'}<span className="hidden text-muted-foreground sm:inline">· {scenarioMeta[scenario].label}</span></button><button data-testid="button-settings" className="rounded-xl border bg-[hsl(var(--card))] p-2 hover:bg-[hsl(var(--muted))]"><Settings2 size={16} /></button><div className="grid h-8 w-8 place-items-center rounded-full bg-[hsl(var(--primary))] text-xs font-bold text-[hsl(var(--primary-foreground))]">NS</div></div></header><main className="shell-grid min-h-[calc(100dvh-68px)] px-4 py-7 md:px-8">{children}</main></div>
+    <div className="md:pl-[245px]"><header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b bg-[hsl(var(--background)/.9)] px-4 backdrop-blur-md md:px-8"><div className="flex items-center gap-3"><button data-testid="button-open-nav" className="rounded-lg border p-2 md:hidden" onClick={() => setMobileNav(true)}><Menu size={18} /></button><div className="hidden items-center gap-2 text-xs text-muted-foreground md:flex"><span className="h-2 w-2 rounded-full bg-emerald-500" />All systems nominal · 18 assets reporting</div><span className="eyebrow text-muted-foreground md:hidden">verdant / ops</span></div><div className="flex items-center gap-2"><button data-testid="button-global-simulation" onClick={() => setRunning(!running)} className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-bold transition ${running ? 'border-amber-300 bg-amber-50 text-amber-900' : 'bg-[hsl(var(--card))] hover:bg-[hsl(var(--muted))]'}`}>{running ? <Pause size={14} /> : <Play size={14} />}{running ? 'Pause demo' : 'Run demo'}<span className="hidden text-muted-foreground sm:inline">· {scenarioMeta[scenario].label}</span></button><button data-testid="button-settings" className="rounded-xl border bg-[hsl(var(--card))] p-2 hover:bg-[hsl(var(--muted))]"><Settings2 size={16} /></button><UserProfileMenu /></div></header><main className="shell-grid min-h-[calc(100dvh-68px)] px-4 py-7 md:px-8">{children}</main></div>
   </div>;
 }
 
@@ -108,10 +249,22 @@ function MetricCard({ label, value, unit, delta, tone = 'teal', icon: Icon }: { 
 
 function Overview() {
   const { running, scenario } = useDemo();
+  const { user, currentRole } = useAuth();
   const totalCapacity = assets.reduce((sum, a) => sum + a.capacity, 0);
   const totalPower = assets.reduce((sum, a) => sum + a.currentPower, 0);
+
+  const roleSubtitles: Record<UserRole, string> = {
+    GRID_OPERATOR: 'RLDC / SLDC Balancing: Real-time generation dispatch, spinning reserve, and frequency stability.',
+    UTILITY: 'DISCOM Demand Coverage: Day-ahead capacity scheduling, contracted volume, and backup reserves.',
+    PLANT_OWNER: 'Asset SCADA Telemetry: Predictive fault triage, turbine health scores, and loss mitigation.',
+    ENERGY_TRADER: 'Day-Ahead Power Market: Schedule arbitrage, deviation settlement, and price exposure.',
+  };
+
+  const firstName = user?.name ? user.name.split(' ')[0] : 'Neel';
+  const orgName = user?.organization || 'Gujarat SLDC';
+
   return <div className="mx-auto max-w-[1450px] fade-up">
-    <div className="mb-8 flex flex-col justify-between gap-4 lg:flex-row lg:items-end"><div><div className="eyebrow text-[hsl(var(--primary))]">Monday · 16 June 2025 · Gujarat control room</div><h1 className="mt-3 max-w-xl text-3xl font-extrabold tracking-[-.04em] md:text-4xl">Good morning, Neel.<br /><span className="text-[hsl(var(--primary))]">Here is what needs your attention.</span></h1></div><Link href="/simulation" data-testid="link-overview-simulation" className="group flex items-center gap-3 self-start rounded-xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-bold text-[hsl(var(--primary-foreground))] shadow-lg shadow-emerald-900/10 lg:self-end">Open live demo <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" /></Link></div>
+    <div className="mb-8 flex flex-col justify-between gap-4 lg:flex-row lg:items-end"><div><div className="eyebrow text-[hsl(var(--primary))]">Monday · 16 June 2025 · {orgName}</div><h1 className="mt-3 max-w-xl text-3xl font-extrabold tracking-[-.04em] md:text-4xl">Good morning, {firstName}.<br /><span className="text-[hsl(var(--primary))]">{roleSubtitles[currentRole] || 'Here is what needs your attention.'}</span></h1></div><Link href="/simulation" data-testid="link-overview-simulation" className="group flex items-center gap-3 self-start rounded-xl bg-[hsl(var(--primary))] px-4 py-3 text-sm font-bold text-[hsl(var(--primary-foreground))] shadow-lg shadow-emerald-900/10 lg:self-end">Open live demo <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" /></Link></div>
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><MetricCard label="Available capacity" value={`${totalCapacity.toFixed(1)}`} unit="MW" delta="+2.4%" icon={BatteryCharging} /><MetricCard label="Live generation" value={`${totalPower.toFixed(2)}`} unit="MW" delta="91.6% of forecast" icon={Activity} tone="blue" /><MetricCard label="Energy exposure / hr" value="₹6,120" delta="↑ ₹2,100 from WT-017" icon={TrendingDown} tone="red" /><MetricCard label="Assets needing action" value="03" unit="open" delta="1 priority one" icon={AlertTriangle} tone="amber" /></div>
     <div className="mt-7 grid gap-5 xl:grid-cols-[1.55fr_1fr]"><div className="panel overflow-hidden"><div className="flex items-start justify-between border-b p-5"><div><div className="eyebrow text-muted-foreground">Operating picture</div><h2 className="mt-2 text-lg font-bold">Generation vs expected</h2></div><div className="flex items-center gap-4 text-xs text-muted-foreground"><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[hsl(var(--primary))]" />Actual</span><span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[hsl(var(--accent))]" />Expected</span></div></div><div className="h-[260px] p-3 pt-5"><ResponsiveContainer width="100%" height="100%"><AreaChart data={history}><defs><linearGradient id="actualFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="hsl(164 52% 30%)" stopOpacity=".22" /><stop offset="100%" stopColor="hsl(164 52% 30%)" stopOpacity="0" /></linearGradient></defs><CartesianGrid stroke="hsl(42 22% 84% / .7)" vertical={false} /><XAxis dataKey="time" tick={{ fontSize: 10, fill: 'hsl(171 12% 42%)' }} tickLine={false} axisLine={false} /><YAxis tick={{ fontSize: 10, fill: 'hsl(171 12% 42%)' }} tickLine={false} axisLine={false} domain={[0, 2.2]} unit=" MW" width={50} /><ChartTooltip contentStyle={{ borderRadius: 10, border: '1px solid hsl(42 22% 84%)', fontSize: 12, background: 'hsl(45 42% 98%)' }} /><Area type="monotone" dataKey="expected" stroke="hsl(37 83% 58%)" strokeWidth={2} strokeDasharray="5 4" fill="none" /><Area type="monotone" dataKey="actual" stroke="hsl(164 52% 30%)" strokeWidth={2.5} fill="url(#actualFill)" /></AreaChart></ResponsiveContainer></div><div className="flex items-center justify-between border-t px-5 py-3 text-xs text-muted-foreground"><span>Last 3 hours · fleet weighted</span><span className="mono text-[hsl(var(--primary))]">-8.4% gap</span></div></div>
       <div className="panel p-5"><SectionTitle eyebrow="Decision queue" title="What matters now" detail="Ranked by loss exposure and confidence." action={<Link href="/maintenance" data-testid="link-view-queue" className="text-xs font-bold text-[hsl(var(--primary))]">View queue</Link>} /><div className="space-y-3">{assets.filter(a => a.status !== 'HEALTHY').map(asset => <Link href={`/assets/${asset.asset_id}`} key={asset.asset_id} data-testid={`card-priority-${asset.asset_id}`} className="group flex items-center gap-3 rounded-xl border bg-[hsl(var(--background)/.55)] p-3 transition hover:-translate-y-0.5 hover:border-[hsl(var(--primary)/.35)]"><div className={`grid h-9 w-9 place-items-center rounded-lg ${asset.type === 'WIND' ? 'bg-teal-100 text-teal-800' : 'bg-sky-100 text-sky-800'}`}>{asset.type === 'WIND' ? <Wind size={17} /> : <Sun size={17} />}</div><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><strong className="mono text-sm">{asset.asset_id}</strong><Badge className={priorityClass[asset.priority]}>{asset.priority}</Badge></div><div className="mt-1 truncate text-xs text-muted-foreground">{asset.probableIssue} · ₹{asset.revenueLossPerHour.toLocaleString('en-IN')}/hr</div></div><ChevronRight size={16} className="text-muted-foreground transition group-hover:translate-x-1" /></Link>)}</div></div></div>
@@ -165,12 +318,48 @@ function RoadmapPage() {
 
 function NotFound() { return <div className="mx-auto max-w-2xl py-24 text-center"><div className="eyebrow text-[hsl(var(--primary))]">404 / signal lost</div><h1 className="mt-4 text-4xl font-extrabold">This route is not in the operating picture.</h1><Link href="/" data-testid="link-back-home" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-3 text-sm font-bold text-[hsl(var(--primary-foreground))]">Back to command center <ArrowRight size={15} /></Link></div>; }
 
-function Router() { return <Shell><Switch><Route path="/" component={Overview} /><Route path="/assets" component={AssetsPage} /><Route path="/assets/:id" component={AssetDetail} /><Route path="/maintenance" component={MaintenancePage} /><Route path="/simulation" component={SimulationPage} /><Route path="/playbook" component={PlaybookPage} /><Route path="/roadmap" component={RoadmapPage} /><Route component={NotFound} /></Switch></Shell>; }
+function Router() {
+  return (
+    <Switch>
+      <Route path="/login" component={LoginPage} />
+      <Route path="/register" component={RegisterPage} />
+      <Route>
+        <Shell>
+          <Switch>
+            <Route path="/" component={Overview} />
+            <Route path="/assets" component={AssetsPage} />
+            <Route path="/assets/:id" component={AssetDetail} />
+            <Route path="/maintenance" component={MaintenancePage} />
+            <Route path="/simulation" component={SimulationPage} />
+            <Route path="/playbook" component={PlaybookPage} />
+            <Route path="/roadmap" component={RoadmapPage} />
+            <Route component={NotFound} />
+          </Switch>
+        </Shell>
+      </Route>
+    </Switch>
+  );
+}
 
 const queryClient = new QueryClient();
 function App() {
-  const [scenario, setScenario] = useState<Scenario>('normal'); const [running, setRunning] = useState(false); const [tick, setTick] = useState(0);
+  const [scenario, setScenario] = useState<Scenario>('normal');
+  const [running, setRunning] = useState(false);
+  const [tick, setTick] = useState(0);
   const context = useMemo(() => ({ scenario, setScenario, running, setRunning, tick, setTick }), [scenario, running, tick]);
-  return <QueryClientProvider client={queryClient}><TooltipProvider><DemoContext.Provider value={context}><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><Router /></WouterRouter><Toaster /></DemoContext.Provider></TooltipProvider></QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <DemoContext.Provider value={context}>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+              <Router />
+            </WouterRouter>
+            <Toaster />
+          </DemoContext.Provider>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
 }
 export default App;

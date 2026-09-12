@@ -186,6 +186,54 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 200, assessment);
   }
 
+  // 1.3 Auth Personas (Problem Statement Personas)
+  if (path === "/api/auth/personas" && method === "GET") {
+    return sendJson(res, 200, [
+      { id: "usr_grid_01", role: "GRID_OPERATOR", name: "Neel Sharma", email: "operator@gridsense.energy", organization: "Gujarat State Load Dispatch Center (SLDC)", roleLabel: "Grid Operator" },
+      { id: "usr_util_02", role: "UTILITY_COMPANY", name: "Priya Patel", email: "utility@tatapower.com", organization: "Tata Power Transmission & Distribution", roleLabel: "Utility Company" },
+      { id: "usr_plant_03", role: "PLANT_OWNER", name: "Aarav Mehta", email: "owner@adanigreen.com", organization: "Adani Green Energy Ltd (Kutch & Pavagada)", roleLabel: "Renewable Plant Owner" },
+      { id: "usr_trade_04", role: "ENERGY_TRADER", name: "Vikram Malhotra", email: "trader@iexindia.com", organization: "Indian Energy Exchange (IEX) Power Desk", roleLabel: "Energy Trader" },
+    ]);
+  }
+
+  // 1.4 Auth Login
+  if (path === "/api/auth/login" && method === "POST") {
+    let body = "";
+    for await (const chunk of req) body += chunk;
+    let data = {};
+    try { data = JSON.parse(body || "{}"); } catch { data = {}; }
+    const email = (data.email || "").toLowerCase();
+    const role = data.role || "GRID_OPERATOR";
+
+    const user = {
+      id: "usr_" + Math.random().toString(36).substring(2, 9),
+      name: data.name || (email.split("@")[0] || "Operator"),
+      email: email || "operator@gridsense.energy",
+      role: role,
+      organization: data.organization || "Renewable Operations Grid",
+      token: "mock-jwt-token-" + Date.now(),
+    };
+    return sendJson(res, 200, { success: true, user, token: user.token });
+  }
+
+  // 1.5 Auth Register
+  if (path === "/api/auth/register" && method === "POST") {
+    let body = "";
+    for await (const chunk of req) body += chunk;
+    let data = {};
+    try { data = JSON.parse(body || "{}"); } catch { data = {}; }
+
+    const user = {
+      id: "usr_" + Math.random().toString(36).substring(2, 9),
+      name: data.name || "Operator",
+      email: data.email || "user@gridsense.energy",
+      role: data.role || "GRID_OPERATOR",
+      organization: data.organization || "Renewable Operations Grid",
+      token: "mock-jwt-token-" + Date.now(),
+    };
+    return sendJson(res, 201, { success: true, user, token: user.token });
+  }
+
   // 2. Assets List
   if (path === "/api/assets" && method === "GET") {
     const type = parsedUrl.searchParams.get("type");
