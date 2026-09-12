@@ -1,13 +1,13 @@
 import { type ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from '@/components/ui/toaster';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { Toaster } from './components/ui/toaster';
+import { TooltipProvider } from './components/ui/tooltip';
 import { Link, Route, Switch, Router as WouterRouter, useLocation, useParams } from 'wouter';
 import { AreaChart, Area, BarChart, Bar, CartesianGrid, LineChart, Line, ResponsiveContainer, Tooltip as ChartTooltip, XAxis, YAxis } from 'recharts';
 import { Activity, AlertTriangle, ArrowDownRight, ArrowRight, BatteryCharging, BookOpen, Building2, CalendarDays, Check, CheckCircle2, ChevronDown, ChevronRight, CircleHelp, ClipboardCheck, CloudSun, Gauge, History, LayoutDashboard, LogIn, LogOut, Menu, Pause, Play, RefreshCw, Search, Settings2, ShieldCheck, SlidersHorizontal, Sun, Thermometer, TrendingDown, User, UserRound, Wind, Wrench, X, Zap } from 'lucide-react';
-import { AuthProvider, useAuth, DEMO_PERSONAS, type UserRole } from '@/lib/AuthContext';
-import { LoginPage } from '@/pages/LoginPage';
-import { RegisterPage } from '@/pages/RegisterPage';
+import { AuthProvider, useAuth, DEMO_PERSONAS, type UserRole } from './lib/AuthContext';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
 
 type AssetStatus = 'HEALTHY' | 'WATCH' | 'WARNING' | 'CRITICAL';
 type Risk = 'LOW' | 'MEDIUM' | 'HIGH';

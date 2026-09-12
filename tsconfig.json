@@ -28,15 +28,7 @@
     "noEmit": true
   },
   "include": [
-    "src/App.tsx",
-    "src/main.tsx",
-    "src/components/error-boundary.tsx",
-    "src/components/ui/toast.tsx",
-    "src/components/ui/toaster.tsx",
-    "src/components/ui/tooltip.tsx",
-    "src/hooks/**/*",
-    "src/lib/**/*",
-    "src/pages/**/*",
+    "src/**/*",
     "vite.config.ts"
   ],
   "exclude": [
