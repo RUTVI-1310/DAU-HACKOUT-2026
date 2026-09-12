@@ -1,0 +1,6 @@
+{
+  "name": "GridSense AI",
+  "description": "GridSense AI • Smarter Forecasts. Stronger Grids. Renewable generation forecasting platform with multi-model ensembles, satellite telemetry, and automated grid dispatch optimization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
