@@ -17,18 +17,26 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./*",
-        "./src/*"
+        "./src/*",
+        "./*"
       ]
     },
     "types": [
       "node",
-      "canvas-confetti"
+      "vite/client"
     ],
     "noEmit": true
   },
   "include": [
-    "src/**/*",
+    "src/App.tsx",
+    "src/main.tsx",
+    "src/components/error-boundary.tsx",
+    "src/components/ui/toast.tsx",
+    "src/components/ui/toaster.tsx",
+    "src/components/ui/tooltip.tsx",
+    "src/hooks/**/*",
+    "src/lib/**/*",
+    "src/pages/**/*",
     "vite.config.ts"
   ],
   "exclude": [

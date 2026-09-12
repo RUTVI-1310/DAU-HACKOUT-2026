@@ -88,14 +88,14 @@ function UserProfileMenu() {
 
   const roleColors: Record<UserRole, string> = {
     GRID_OPERATOR: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-    UTILITY: 'bg-sky-100 text-sky-800 border-sky-300',
+    UTILITY_COMPANY: 'bg-sky-100 text-sky-800 border-sky-300',
     PLANT_OWNER: 'bg-amber-100 text-amber-900 border-amber-300',
     ENERGY_TRADER: 'bg-purple-100 text-purple-900 border-purple-300',
   };
 
   const roleTitles: Record<UserRole, string> = {
     GRID_OPERATOR: 'Grid Operator',
-    UTILITY: 'Utility Company',
+    UTILITY_COMPANY: 'Utility Company',
     PLANT_OWNER: 'Plant Owner',
     ENERGY_TRADER: 'Energy Trader',
   };
@@ -108,7 +108,7 @@ function UserProfileMenu() {
         className="flex items-center gap-2 rounded-xl border bg-[hsl(var(--card))] px-2.5 py-1.5 transition hover:bg-[hsl(var(--muted))]"
       >
         <div className="grid h-7 w-7 place-items-center rounded-lg bg-[hsl(var(--primary))] text-xs font-bold text-[hsl(var(--primary-foreground))] shadow-sm">
-          {user?.initials || 'NS'}
+          {user?.initials || user?.avatarInitials || 'NS'}
         </div>
         <div className="hidden text-left sm:block">
           <div className="text-xs font-bold leading-tight">{user?.name || 'Neel Sharma'}</div>
@@ -160,7 +160,7 @@ function UserProfileMenu() {
                     >
                       <div className="min-w-0 pr-2">
                         <div className="truncate">{persona.name}</div>
-                        <div className="mono text-[10px] text-muted-foreground truncate">{persona.title}</div>
+                        <div className="mono text-[10px] text-muted-foreground truncate">{persona.title || persona.roleLabel}</div>
                       </div>
                       {isSelected && <CheckCircle2 size={14} className="shrink-0 text-[hsl(var(--primary))]" />}
                     </button>
@@ -255,7 +255,7 @@ function Overview() {
 
   const roleSubtitles: Record<UserRole, string> = {
     GRID_OPERATOR: 'RLDC / SLDC Balancing: Real-time generation dispatch, spinning reserve, and frequency stability.',
-    UTILITY: 'DISCOM Demand Coverage: Day-ahead capacity scheduling, contracted volume, and backup reserves.',
+    UTILITY_COMPANY: 'DISCOM Demand Coverage: Day-ahead capacity scheduling, contracted volume, and backup reserves.',
     PLANT_OWNER: 'Asset SCADA Telemetry: Predictive fault triage, turbine health scores, and loss mitigation.',
     ENERGY_TRADER: 'Day-Ahead Power Market: Schedule arbitrage, deviation settlement, and price exposure.',
   };

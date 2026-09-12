@@ -10,6 +10,8 @@ export interface UserProfile {
   roleLabel: string;
   organization: string;
   avatarInitials: string;
+  initials?: string;
+  title?: string;
   badgeColor: string;
   description: string;
 }
@@ -23,6 +25,8 @@ export const DEMO_PERSONAS: Record<UserRole, UserProfile> = {
     roleLabel: 'Grid Operator',
     organization: 'Gujarat State Load Dispatch Center (SLDC)',
     avatarInitials: 'NS',
+    initials: 'NS',
+    title: 'Grid Operator',
     badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
     description: 'Monitors grid stability, frequency deviations, and transmission curtailment orders.',
   },
@@ -34,6 +38,8 @@ export const DEMO_PERSONAS: Record<UserRole, UserProfile> = {
     roleLabel: 'Utility Company',
     organization: 'Tata Power Transmission & Distribution',
     avatarInitials: 'PP',
+    initials: 'PP',
+    title: 'Utility Company',
     badgeColor: 'bg-blue-100 text-blue-800 border-blue-300',
     description: 'Plans generation capacity reserves, backup scheduling, and demand coverage.',
   },
@@ -45,6 +51,8 @@ export const DEMO_PERSONAS: Record<UserRole, UserProfile> = {
     roleLabel: 'Renewable Plant Owner',
     organization: 'Adani Green Energy Ltd (Kutch & Pavagada)',
     avatarInitials: 'AM',
+    initials: 'AM',
+    title: 'Renewable Plant Owner',
     badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
     description: 'Tracks site-level wind/solar telemetry, inverter health, and maintenance dispatch.',
   },
@@ -56,6 +64,8 @@ export const DEMO_PERSONAS: Record<UserRole, UserProfile> = {
     roleLabel: 'Energy Trader',
     organization: 'Indian Energy Exchange (IEX) Power Desk',
     avatarInitials: 'VM',
+    initials: 'VM',
+    title: 'Energy Trader',
     badgeColor: 'bg-purple-100 text-purple-800 border-purple-300',
     description: 'Optimizes day-ahead power contracts, price arbitrage, and financial risk exposure.',
   },
@@ -63,6 +73,7 @@ export const DEMO_PERSONAS: Record<UserRole, UserProfile> = {
 
 interface AuthContextType {
   user: UserProfile | null;
+  currentRole: UserRole;
   isAuthenticated: boolean;
   login: (email: string, role?: UserRole) => Promise<boolean>;
   loginAsPersona: (role: UserRole) => void;
@@ -164,6 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
+        currentRole: user?.role || 'GRID_OPERATOR',
         isAuthenticated: Boolean(user),
         login,
         loginAsPersona,
