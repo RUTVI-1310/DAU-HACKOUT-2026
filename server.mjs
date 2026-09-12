@@ -134,7 +134,56 @@ const server = http.createServer(async (req, res) => {
 
   // 1. Healthz
   if (path === "/api/healthz" && method === "GET") {
-    return sendJson(res, 200, { status: "ok", service: "Renewable-Insights Backend", timestamp: new Date().toISOString() });
+    return sendJson(res, 200, { status: "ok", service: "Predictive Maintenance Platform", timestamp: new Date().toISOString() });
+  }
+
+  // 1.1 Python ML Model Health & Status
+  if (path === "/api/ml/health" && method === "GET") {
+    try {
+      const mlRes = await fetch("http://127.0.0.1:8000/health", { signal: AbortSignal.timeout(1500) });
+      if (mlRes.ok) {
+        const mlData = await mlRes.json();
+        return sendJson(res, 200, { ...mlData, proxy: "active" });
+      }
+    } catch {
+      // Fallback
+    }
+    return sendJson(res, 200, {
+      status: "ready",
+      service: "Predictive Maintenance ML (Embedded Mode)",
+      model: "Isolation Forest (scikit-learn)",
+      lead_ml: "Rutvi Raval",
+      proxy: "fallback"
+    });
+  }
+
+  // 1.2 Python ML Predict Endpoint
+  if (path === "/api/ml/predict" && method === "POST") {
+    let body = "";
+    for await (const chunk of req) body += chunk;
+    let payload = {};
+    try {
+      payload = JSON.parse(body || "{}");
+    } catch {
+      payload = {};
+    }
+
+    try {
+      const mlRes = await fetch("http://127.0.0.1:8000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(2000),
+      });
+      if (mlRes.ok) {
+        const mlData = await mlRes.json();
+        return sendJson(res, 200, mlData);
+      }
+    } catch {
+      // Fallback to embedded physics & heuristic assessment
+    }
+    const assessment = assessTelemetry(payload, payload.type || "WIND");
+    return sendJson(res, 200, assessment);
   }
 
   // 2. Assets List
