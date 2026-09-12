@@ -90,15 +90,17 @@ export const WeatherSatTelemetry: React.FC<WeatherSatTelemetryProps> = ({
             position: 'top',
             labels: {
               boxWidth: 12,
-              font: { size: 11, weight: 'bold' },
+              color: '#e2e8f0',
+              font: { size: 11, weight: 'bold', family: "'JetBrains Mono', monospace" },
             },
           },
         },
         scales: {
           x: {
-            grid: { color: '#f1f5f9' },
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
             ticks: {
-              font: { size: 10 },
+              color: '#94a3b8',
+              font: { size: 10, family: "'JetBrains Mono', monospace" },
               maxRotation: 45,
               callback: function (val, index) {
                 return index % 4 === 0 ? labels[index] : '';
@@ -111,12 +113,16 @@ export const WeatherSatTelemetry: React.FC<WeatherSatTelemetryProps> = ({
             title: {
               display: true,
               text: 'Irradiance (W/m²)',
-              color: '#d97706',
+              color: '#f59e0b',
               font: { size: 10, weight: 'bold' },
             },
             min: 0,
             max: 1100,
-            grid: { color: '#f1f5f9' },
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: {
+              color: '#94a3b8',
+              font: { size: 10, family: "'JetBrains Mono', monospace" },
+            },
           },
           yWind: {
             type: 'linear',
@@ -124,12 +130,16 @@ export const WeatherSatTelemetry: React.FC<WeatherSatTelemetryProps> = ({
             title: {
               display: true,
               text: 'Wind Speed (m/s)',
-              color: '#0891b2',
+              color: '#06b6d4',
               font: { size: 10, weight: 'bold' },
             },
             min: 0,
             max: 30,
             grid: { drawOnChartArea: false },
+            ticks: {
+              color: '#94a3b8',
+              font: { size: 10, family: "'JetBrains Mono', monospace" },
+            },
           },
           yCloud: {
             type: 'linear',
@@ -152,29 +162,32 @@ export const WeatherSatTelemetry: React.FC<WeatherSatTelemetryProps> = ({
   if (!currentWeather) return null;
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/90 shadow-sm space-y-7 sm:space-y-8">
+    <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-800/90 shadow-2xl space-y-7 sm:space-y-8 relative overflow-hidden">
+      {/* Top subtle ambient glow */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-500/60 via-cyan-500/40 to-transparent"></div>
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 flex items-center justify-center shadow-xs">
             <Satellite className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
-              Satellite &amp; High-Resolution Weather Telemetry
+            <h3 className="text-base font-extrabold text-white tracking-tight">
+              Satellite &amp; High-Resolution Weather Telemetry HUD
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-400 mt-0.5">
               Ingesting NOAA HRRR, ECMWF, and GOES-16 geostationary satellite atmospheric vectors.
             </p>
           </div>
         </div>
 
         <div className="flex items-center space-x-2.5 text-xs">
-          <span className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
-            <Radio className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
-            <span>Telemetry Feed: 1.0 Hz Active</span>
+          <span className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30 shadow-xs">
+            <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+            <span className="font-mono">Telemetry Feed: 1.0 Hz Active</span>
           </span>
-          <span className="font-mono text-slate-600 font-bold bg-slate-100 px-2.5 py-1.5 rounded-lg">
+          <span className="font-mono text-slate-300 font-bold bg-slate-900 border border-slate-700 px-2.5 py-1.5 rounded-lg shadow-inner">
             Target: H+{selectedHourOffset}
           </span>
         </div>
@@ -183,115 +196,116 @@ export const WeatherSatTelemetry: React.FC<WeatherSatTelemetryProps> = ({
       {/* Real-time Weather Grid Gauges */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5">
         {/* 1. Solar GHI */}
-        <div className="bg-amber-50/60 p-3 rounded-xl border border-amber-200/60 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-amber-700 mb-1">
+        <div className="glass-panel p-3.5 rounded-xl border border-amber-500/30 bg-slate-900/80 shadow-md flex flex-col justify-between">
+          <div className="flex items-center justify-between text-amber-400 mb-1.5">
             <span className="text-[11px] font-bold uppercase tracking-wider">Solar GHI</span>
-            <Sun className="w-4 h-4 text-amber-500" />
+            <Sun className="w-4 h-4 text-amber-400" />
           </div>
           <div>
-            <span className="text-xl font-black text-amber-950 font-mono">
+            <span className="text-2xl font-black text-white font-mono">
               {currentWeather.ghi}
             </span>
-            <span className="text-xs text-amber-700 ml-1">W/m²</span>
+            <span className="text-xs text-amber-400 ml-1 font-mono font-semibold">W/m²</span>
           </div>
-          <div className="text-[10px] text-amber-600 mt-1">
-            DNI: {currentWeather.dni} W/m²
+          <div className="text-[10px] text-slate-400 mt-1 font-mono">
+            DNI: <strong className="text-amber-300">{currentWeather.dni}</strong> W/m²
           </div>
         </div>
 
         {/* 2. Wind Speed */}
-        <div className="bg-cyan-50/60 p-3 rounded-xl border border-cyan-200/60 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-cyan-700 mb-1">
+        <div className="glass-panel p-3.5 rounded-xl border border-cyan-500/30 bg-slate-900/80 shadow-md flex flex-col justify-between">
+          <div className="flex items-center justify-between text-cyan-400 mb-1.5">
             <span className="text-[11px] font-bold uppercase tracking-wider">Wind (100m)</span>
-            <Wind className="w-4 h-4 text-cyan-500" />
+            <Wind className="w-4 h-4 text-cyan-400" />
           </div>
           <div>
-            <span className="text-xl font-black text-cyan-950 font-mono">
+            <span className="text-2xl font-black text-white font-mono">
               {currentWeather.windSpeed100m}
             </span>
-            <span className="text-xs text-cyan-700 ml-1">m/s</span>
+            <span className="text-xs text-cyan-400 ml-1 font-mono font-semibold">m/s</span>
           </div>
-          <div className="text-[10px] text-cyan-600 mt-1">
-            Dir: {currentWeather.windDirectionDeg}° (WSW)
+          <div className="text-[10px] text-slate-400 mt-1 font-mono">
+            Dir: <strong className="text-cyan-300">{currentWeather.windDirectionDeg}°</strong> (WSW)
           </div>
         </div>
 
         {/* 3. Cloud Cover */}
-        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-slate-600 mb-1">
+        <div className="glass-panel p-3.5 rounded-xl border border-slate-700 bg-slate-900/80 shadow-md flex flex-col justify-between">
+          <div className="flex items-center justify-between text-slate-300 mb-1.5">
             <span className="text-[11px] font-bold uppercase tracking-wider">Cloud Cover</span>
-            <CloudSun className="w-4 h-4 text-slate-500" />
+            <CloudSun className="w-4 h-4 text-slate-400" />
           </div>
           <div>
-            <span className="text-xl font-black text-slate-900 font-mono">
+            <span className="text-2xl font-black text-white font-mono">
               {currentWeather.cloudCoverPct}
             </span>
-            <span className="text-xs text-slate-600 ml-1">%</span>
+            <span className="text-xs text-slate-400 ml-1 font-mono font-semibold">%</span>
           </div>
-          <div className="text-[10px] text-slate-500 mt-1">
-            Albedo: {(1 - currentWeather.cloudCoverPct / 100).toFixed(2)}
+          <div className="text-[10px] text-slate-400 mt-1 font-mono">
+            Albedo: <strong className="text-slate-300">{(1 - currentWeather.cloudCoverPct / 100).toFixed(2)}</strong>
           </div>
         </div>
 
         {/* 4. Ambient Temperature */}
-        <div className="bg-orange-50/60 p-3 rounded-xl border border-orange-200/60 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-orange-700 mb-1">
+        <div className="glass-panel p-3.5 rounded-xl border border-orange-500/30 bg-slate-900/80 shadow-md flex flex-col justify-between">
+          <div className="flex items-center justify-between text-orange-400 mb-1.5">
             <span className="text-[11px] font-bold uppercase tracking-wider">Temperature</span>
-            <Thermometer className="w-4 h-4 text-orange-500" />
+            <Thermometer className="w-4 h-4 text-orange-400" />
           </div>
           <div>
-            <span className="text-xl font-black text-orange-950 font-mono">
+            <span className="text-2xl font-black text-white font-mono">
               {currentWeather.ambientTempC}
             </span>
-            <span className="text-xs text-orange-700 ml-1">°C</span>
+            <span className="text-xs text-orange-400 ml-1 font-mono font-semibold">°C</span>
           </div>
-          <div className="text-[10px] text-orange-600 mt-1">
-            PV Cell: {Math.round(currentWeather.ambientTempC + (currentWeather.ghi / 800) * 28)}°C
+          <div className="text-[10px] text-slate-400 mt-1 font-mono">
+            PV Cell: <strong className="text-orange-300">{Math.round(currentWeather.ambientTempC + (currentWeather.ghi / 800) * 28)}°C</strong>
           </div>
         </div>
 
         {/* 5. Air Density */}
-        <div className="bg-indigo-50/60 p-3 rounded-xl border border-indigo-200/60 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-indigo-700 mb-1">
+        <div className="glass-panel p-3.5 rounded-xl border border-indigo-500/30 bg-slate-900/80 shadow-md flex flex-col justify-between">
+          <div className="flex items-center justify-between text-indigo-400 mb-1.5">
             <span className="text-[11px] font-bold uppercase tracking-wider">Air Density (ρ)</span>
-            <Gauge className="w-4 h-4 text-indigo-500" />
+            <Gauge className="w-4 h-4 text-indigo-400" />
           </div>
           <div>
-            <span className="text-xl font-black text-indigo-950 font-mono">
+            <span className="text-2xl font-black text-white font-mono">
               {currentWeather.airDensity}
             </span>
-            <span className="text-xs text-indigo-700 ml-1">kg/m³</span>
+            <span className="text-xs text-indigo-400 ml-1 font-mono font-semibold">kg/m³</span>
           </div>
-          <div className="text-[10px] text-indigo-600 mt-1">
-            Baro: {currentWeather.barometricPressureHpa} hPa
+          <div className="text-[10px] text-slate-400 mt-1 font-mono">
+            Baro: <strong className="text-indigo-300">{currentWeather.barometricPressureHpa}</strong> hPa
           </div>
         </div>
 
         {/* 6. Relative Humidity */}
-        <div className="bg-teal-50/60 p-3 rounded-xl border border-teal-200/60 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-teal-700 mb-1">
+        <div className="glass-panel p-3.5 rounded-xl border border-teal-500/30 bg-slate-900/80 shadow-md flex flex-col justify-between">
+          <div className="flex items-center justify-between text-teal-400 mb-1.5">
             <span className="text-[11px] font-bold uppercase tracking-wider">Rel Humidity</span>
-            <CloudRain className="w-4 h-4 text-teal-500" />
+            <CloudRain className="w-4 h-4 text-teal-400" />
           </div>
           <div>
-            <span className="text-xl font-black text-teal-950 font-mono">
+            <span className="text-2xl font-black text-white font-mono">
               {currentWeather.relativeHumidityPct}
             </span>
-            <span className="text-xs text-teal-700 ml-1">%</span>
+            <span className="text-xs text-teal-400 ml-1 font-mono font-semibold">%</span>
           </div>
-          <div className="text-[10px] text-teal-600 mt-1">
-            Dew Point: ~14°C
+          <div className="text-[10px] text-slate-400 mt-1 font-mono">
+            Dew Point: <strong className="text-teal-300">~14°C</strong>
           </div>
         </div>
       </div>
 
       {/* Weather Trend Multi-Axis Chart */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-            Atmospheric Radiation &amp; Wind Velocity Trajectory
+      <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+            <span>Atmospheric Radiation &amp; Wind Velocity Trajectory</span>
           </span>
-          <span className="text-[11px] text-slate-400">
+          <span className="text-[11px] text-slate-400 font-mono">
             Hourly Met Trends with Interpolated Solar Noon
           </span>
         </div>

@@ -119,9 +119,10 @@ export const FinancialTradingStudio: React.FC<FinancialTradingStudioProps> = ({
         },
         scales: {
           x: {
-            grid: { color: '#f1f5f9' },
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
             ticks: {
-              font: { size: 10 },
+              color: '#94a3b8',
+              font: { size: 10, family: "'JetBrains Mono', monospace" },
               maxRotation: 45,
               callback: function (val, index) {
                 return index % 4 === 0 ? labels[index] : '';
@@ -135,10 +136,12 @@ export const FinancialTradingStudio: React.FC<FinancialTradingStudioProps> = ({
               display: true,
               text: 'Market LMP (₹/MWh)',
               font: { size: 10, weight: 'bold' },
-              color: '#059669',
+              color: '#10b981',
             },
-            grid: { color: '#f1f5f9' },
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
             ticks: {
+              color: '#10b981',
+              font: { size: 10, family: "'JetBrains Mono', monospace" },
               callback: (v) => `₹${v}`,
             },
           },
@@ -149,10 +152,12 @@ export const FinancialTradingStudio: React.FC<FinancialTradingStudioProps> = ({
               display: true,
               text: 'Generation Delta (MW)',
               font: { size: 10, weight: 'bold' },
-              color: '#64748b',
+              color: '#94a3b8',
             },
             grid: { drawOnChartArea: false },
             ticks: {
+              color: '#94a3b8',
+              font: { size: 10, family: "'JetBrains Mono', monospace" },
               callback: (v) => `${v} MW`,
             },
           },
@@ -160,7 +165,11 @@ export const FinancialTradingStudio: React.FC<FinancialTradingStudioProps> = ({
         plugins: {
           legend: {
             position: 'top',
-            labels: { boxWidth: 12, font: { size: 11 } },
+            labels: { 
+              boxWidth: 12, 
+              color: '#e2e8f0',
+              font: { size: 11, weight: 'bold', family: "'JetBrains Mono', monospace" } 
+            },
           },
         },
       },
@@ -174,102 +183,106 @@ export const FinancialTradingStudio: React.FC<FinancialTradingStudioProps> = ({
   }, [forecastData, tariffBaseUSDperMWh]);
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/90 shadow-sm space-y-7 sm:space-y-8">
+    <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-800/90 shadow-2xl space-y-7 sm:space-y-8 relative overflow-hidden">
+      {/* Top subtle ambient glow */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500/60 via-amber-500/40 to-transparent"></div>
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shadow-xs">
             <IndianRupee className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
+            <h3 className="text-base font-extrabold text-white tracking-tight">
               Energy Trading, Settlement Risk &amp; BESS Arbitrage Studio
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-400 mt-0.5">
               Correlating renewable generation volatility with wholesale power market Locational Marginal Pricing (LMP / IEX).
             </p>
           </div>
         </div>
 
-        <div className="text-right">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Contract Tariff</span>
-          <span className="text-sm font-mono font-black text-emerald-700">₹{tariffBaseINR.toLocaleString()} / MWh</span>
+        <div className="text-right bg-slate-900/80 border border-slate-800 px-3.5 py-2 rounded-xl shadow-inner">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Contract Baseline Tariff</span>
+          <span className="text-sm font-mono font-black text-emerald-400">₹{tariffBaseINR.toLocaleString()} / MWh</span>
         </div>
       </div>
 
       {/* Financial Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Gross Projected Revenue */}
-        <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+        <div className="glass-panel glass-panel-hover p-5 rounded-xl border border-slate-800 bg-slate-900/80 shadow-md flex flex-col justify-between">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
             Gross Projected Yield
           </span>
           <div className="my-2.5">
-            <span className="text-2xl font-black text-slate-900 tracking-tight">
+            <span className="text-3xl font-black text-white font-mono tracking-tight">
               ₹{grossProjectRevenueINR(grossProjectedRevenueINR)}
             </span>
           </div>
-          <span className="text-[11px] text-slate-500">
+          <span className="text-[11px] text-slate-400 font-mono">
             Based on {Math.round(totalForecastEnergyMWh).toLocaleString()} MWh generated
           </span>
         </div>
 
         {/* Imbalance Settlement Risk */}
-        <div className="p-5 rounded-xl bg-rose-50/70 border border-rose-200 flex flex-col justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-rose-700 flex items-center justify-between">
+        <div className="glass-panel glass-panel-hover p-5 rounded-xl border border-rose-500/30 bg-slate-900/80 shadow-md flex flex-col justify-between">
+          <span className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center justify-between">
             <span>Imbalance Deviation Risk</span>
-            <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
+            <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
           </span>
           <div className="my-2.5">
-            <span className="text-2xl font-black text-rose-700 tracking-tight">
+            <span className="text-3xl font-black text-rose-400 font-mono tracking-tight">
               ₹{totalImbalancePenaltyINR.toLocaleString()}
             </span>
           </div>
-          <span className="text-[11px] text-rose-600">
+          <span className="text-[11px] text-rose-400/80 font-mono">
             DSM penalty if schedule deviations are unhedged
           </span>
         </div>
 
         {/* BESS Arbitrage Profit */}
-        <div className="p-5 rounded-xl bg-emerald-50/70 border border-emerald-200 flex flex-col justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center justify-between">
+        <div className="glass-panel glass-panel-hover p-5 rounded-xl border border-emerald-500/30 bg-slate-900/80 shadow-md flex flex-col justify-between">
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center justify-between">
             <span>BESS Arbitrage Upside</span>
-            <BatteryCharging className="w-3.5 h-3.5 text-emerald-600" />
+            <BatteryCharging className="w-3.5 h-3.5 text-emerald-400" />
           </span>
           <div className="my-2.5">
-            <span className="text-2xl font-black text-emerald-800 tracking-tight">
+            <span className="text-3xl font-black text-emerald-400 font-mono tracking-tight">
               +₹{totalBessArbitrageProfitINR.toLocaleString()}
             </span>
           </div>
-          <span className="text-[11px] text-emerald-700">
+          <span className="text-[11px] text-emerald-400/80 font-mono">
             Shift midday solar excess to peak evening tariff
           </span>
         </div>
 
         {/* Avoided Curtailment Revenue */}
-        <div className="p-5 rounded-xl bg-cyan-50/70 border border-cyan-200 flex flex-col justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-cyan-800 flex items-center justify-between">
+        <div className="glass-panel glass-panel-hover p-5 rounded-xl border border-cyan-500/30 bg-slate-900/80 shadow-md flex flex-col justify-between">
+          <span className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center justify-between">
             <span>Avoided Curtailment Value</span>
-            <ShieldCheck className="w-3.5 h-3.5 text-cyan-600" />
+            <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
           </span>
           <div className="my-2.5">
-            <span className="text-2xl font-black text-cyan-800 tracking-tight">
+            <span className="text-3xl font-black text-cyan-400 font-mono tracking-tight">
               +₹{avoidedCurtailmentSavingsINR.toLocaleString()}
             </span>
           </div>
-          <span className="text-[11px] text-cyan-700">
+          <span className="text-[11px] text-cyan-400/80 font-mono">
             Preserved through storage &amp; intertie dispatch
           </span>
         </div>
       </div>
 
       {/* Chart: Market LMP vs Forecast Imbalance Delta */}
-      <div className="pt-2">
+      <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-            Hourly Locational Marginal Price (LMP) &amp; Supply Deviation (MW)
+          <span className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>Hourly Locational Marginal Price (LMP) &amp; Supply Deviation (MW)</span>
           </span>
-          <span className="text-[11px] text-slate-400">
+          <span className="text-[11px] text-slate-400 font-mono">
             IEX Green Day-Ahead / Real-Time Market simulation
           </span>
         </div>

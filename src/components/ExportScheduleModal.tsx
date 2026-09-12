@@ -102,19 +102,19 @@ export const ExportScheduleModal: React.FC<ExportScheduleModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full flex flex-col max-h-[85vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4">
+      <div className="glass-panel rounded-2xl shadow-2xl border border-slate-800 max-w-2xl w-full flex flex-col max-h-[85vh] overflow-hidden">
         {/* Header */}
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shadow-xs">
               <Download className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
+              <h3 className="font-extrabold text-white text-sm sm:text-base">
                 Export Grid Schedule &amp; Dispatch Orders
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-400">
                 Format compliant with Grid-India / SLDC, IEX/PXIL, CAISO, and ENTSO-E scheduling formats.
               </p>
             </div>
@@ -122,7 +122,7 @@ export const ExportScheduleModal: React.FC<ExportScheduleModalProps> = ({
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition"
+            className="w-8 h-8 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -132,14 +132,14 @@ export const ExportScheduleModal: React.FC<ExportScheduleModalProps> = ({
         <div className="p-5 sm:p-6 space-y-5 flex-grow overflow-y-auto">
           {/* Format selection */}
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-700">Select File Format:</span>
-            <div className="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-200 text-xs">
+            <span className="text-xs font-bold text-slate-300">Select File Format:</span>
+            <div className="flex items-center bg-slate-900 rounded-lg p-0.5 border border-slate-800 text-xs">
               <button
                 onClick={() => setExportFormat('csv')}
-                className={`flex items-center space-x-1 px-3 py-1 rounded-md font-bold transition ${
+                className={`flex items-center space-x-1 px-3 py-1.5 rounded-md font-bold transition cursor-pointer ${
                   exportFormat === 'csv'
-                    ? 'bg-white text-emerald-700 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
                 <FileSpreadsheet className="w-3.5 h-3.5" />
@@ -147,10 +147,10 @@ export const ExportScheduleModal: React.FC<ExportScheduleModalProps> = ({
               </button>
               <button
                 onClick={() => setExportFormat('json')}
-                className={`flex items-center space-x-1 px-3 py-1 rounded-md font-bold transition ${
+                className={`flex items-center space-x-1 px-3 py-1.5 rounded-md font-bold transition cursor-pointer ${
                   exportFormat === 'json'
-                    ? 'bg-white text-emerald-700 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
                 <FileCode className="w-3.5 h-3.5" />
@@ -160,29 +160,29 @@ export const ExportScheduleModal: React.FC<ExportScheduleModalProps> = ({
           </div>
 
           {/* Code Preview */}
-          <div className="bg-slate-950 text-emerald-400 p-3 rounded-xl font-mono text-xs max-h-[300px] overflow-auto border border-slate-800">
+          <div className="bg-slate-950 text-emerald-400 p-3.5 rounded-xl font-mono text-xs max-h-[300px] overflow-auto border border-slate-800/90 shadow-inner">
             <pre className="whitespace-pre">{payload.slice(0, 2000)}{payload.length > 2000 ? '\n... (truncated for preview)' : ''}</pre>
           </div>
 
-          <div className="text-xs text-slate-500 italic">
+          <div className="text-xs text-slate-400 italic">
             Schedule contains {forecastData.length} hourly forecast timesteps computed using the{' '}
-            <strong className="text-slate-800">{selectedModel.toUpperCase()}</strong> pipeline.
+            <strong className="text-slate-200 font-mono">{selectedModel.toUpperCase()}</strong> pipeline.
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50">
+        <div className="p-4 border-t border-slate-800/80 flex items-center justify-between bg-slate-950/60">
           <button
             onClick={handleCopy}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 transition"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-xs font-bold text-slate-200 transition cursor-pointer shadow-xs"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copied ? 'Copied to Clipboard' : 'Copy Data'}</span>
           </button>
 
           <button
             onClick={handleDownload}
-            className="flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition shadow-sm"
+            className="flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition shadow-sm cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Download .{exportFormat.toUpperCase()}</span>

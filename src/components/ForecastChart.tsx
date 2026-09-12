@@ -271,12 +271,13 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
         scales: {
           x: {
             grid: {
-              color: '#f1f5f9',
+              color: 'rgba(255, 255, 255, 0.05)',
             },
             ticks: {
+              color: '#94a3b8',
               maxRotation: 45,
               minRotation: 0,
-              font: { size: 10 },
+              font: { size: 10, family: "'JetBrains Mono', monospace" },
               callback: function (val, index) {
                 // Show every 3rd or 4th label to prevent clutter on 72h
                 const step = forecastData.length > 48 ? 4 : 2;
@@ -289,13 +290,14 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
               display: true,
               text: 'Power Generation & Scheduled Demand (MW)',
               font: { size: 11, weight: 'bold' },
-              color: '#475569',
+              color: '#cbd5e1',
             },
             grid: {
-              color: '#f1f5f9',
+              color: 'rgba(255, 255, 255, 0.05)',
             },
             ticks: {
-              font: { size: 10 },
+              color: '#94a3b8',
+              font: { size: 10, family: "'JetBrains Mono', monospace" },
               callback: (val) => `${val} MW`,
             },
             beginAtZero: true,
@@ -324,20 +326,24 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
   const activePoint = forecastData[selectedHourOffset] || forecastData[0];
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col space-y-6 sm:space-y-7">
+    <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-800/90 shadow-2xl flex flex-col space-y-6 sm:space-y-7 relative overflow-hidden">
+      {/* Subtle top ambient glow */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500/60 via-cyan-500/40 to-transparent"></div>
+
       {/* Chart Header Controls & Layer Toggles */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
         <div>
           <div className="flex items-center space-x-2.5">
-            <h2 className="text-base font-extrabold text-slate-900 tracking-tight">
-              Renewable Generation Forecast Horizon ({params.horizonHours} Hours)
+            <h2 className="text-base font-extrabold text-white tracking-tight flex items-center space-x-2">
+              <span>Renewable Generation Forecast Horizon</span>
+              <span className="text-slate-400 font-normal">({params.horizonHours} Hours)</span>
             </h2>
-            <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+            <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30">
               {params.selectedPlantId === 'ALL' ? 'Fleet-Wide (1,230 MW)' : 'Site Level'}
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Interactive multi-sensor time-series model blending. Click any point to inspect hour-level dispatch specifics.
+          <p className="text-xs text-slate-400 mt-1">
+            Interactive multi-sensor time-series model blending. Click any point along the curve to inspect hour-level dispatch specifics.
           </p>
         </div>
 
@@ -345,24 +351,24 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
         <div className="flex flex-wrap items-center gap-2.5 text-xs">
           <button
             onClick={() => setCompareAllModels(!compareAllModels)}
-            className={`px-3.5 py-2 rounded-lg font-bold border transition flex items-center space-x-1.5 ${
+            className={`px-3.5 py-2 rounded-lg font-bold border transition flex items-center space-x-1.5 cursor-pointer ${
               compareAllModels
-                ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
-                : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                ? 'bg-purple-600 text-white border-purple-500 shadow-md shadow-purple-900/40'
+                : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800 hover:text-white'
             }`}
             title="Overlay Prophet, LSTM, and XGBoost curves simultaneously"
           >
-            <Layers className="w-3.5 h-3.5" />
+            <Layers className="w-3.5 h-3.5 text-purple-300" />
             <span>{compareAllModels ? 'Models Overlaid' : 'Compare 3 Models'}</span>
           </button>
 
           {!compareAllModels && (
             <button
               onClick={() => setShowConfidenceBand(!showConfidenceBand)}
-              className={`px-3 py-2 rounded-lg text-xs font-semibold border transition flex items-center space-x-1 ${
+              className={`px-3 py-2 rounded-lg text-xs font-semibold border transition flex items-center space-x-1 cursor-pointer ${
                 showConfidenceBand
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                  : 'bg-slate-100 text-slate-500 border-slate-200'
+                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
+                  : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
               }`}
               title="Toggle P10 - P90 Uncertainty Envelope"
             >
@@ -377,53 +383,53 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <button
             onClick={() => setShowTotal(!showTotal)}
-            className={`px-2.5 py-1 rounded-md font-semibold border flex items-center space-x-1.5 transition ${
+            className={`px-2.5 py-1 rounded-md font-semibold border flex items-center space-x-1.5 transition cursor-pointer ${
               showTotal 
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
-                : 'bg-slate-50 text-slate-400 border-slate-200 line-through'
+                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-xs' 
+                : 'bg-slate-900/60 text-slate-500 border-slate-800 line-through'
             }`}
           >
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-xs"></span>
             <span>Total Forecast ({params.selectedModel.toUpperCase()})</span>
           </button>
 
           <button
             onClick={() => setShowSolar(!showSolar)}
-            className={`px-2.5 py-1 rounded-md font-semibold border flex items-center space-x-1.5 transition ${
+            className={`px-2.5 py-1 rounded-md font-semibold border flex items-center space-x-1.5 transition cursor-pointer ${
               showSolar 
-                ? 'bg-amber-50 text-amber-800 border-amber-300' 
-                : 'bg-slate-50 text-slate-400 border-slate-200 line-through'
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-xs' 
+                : 'bg-slate-900/60 text-slate-500 border-slate-800 line-through'
             }`}
           >
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-xs"></span>
             <span>Solar PV</span>
           </button>
 
           <button
             onClick={() => setShowWind(!showWind)}
-            className={`px-2.5 py-1 rounded-md font-semibold border flex items-center space-x-1.5 transition ${
+            className={`px-2.5 py-1 rounded-md font-semibold border flex items-center space-x-1.5 transition cursor-pointer ${
               showWind 
-                ? 'bg-cyan-50 text-cyan-800 border-cyan-300' 
-                : 'bg-slate-50 text-slate-400 border-slate-200 line-through'
+                ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-xs' 
+                : 'bg-slate-900/60 text-slate-500 border-slate-800 line-through'
             }`}
           >
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-xs"></span>
             <span>Wind Turbines</span>
           </button>
 
           <button
             onClick={() => setShowScheduledDemand(!showScheduledDemand)}
-            className={`px-2.5 py-1 rounded-md font-semibold border flex items-center space-x-1.5 transition ${
+            className={`px-2.5 py-1 rounded-md font-semibold border flex items-center space-x-1.5 transition cursor-pointer ${
               showScheduledDemand 
-                ? 'bg-slate-100 text-slate-700 border-slate-300' 
-                : 'bg-slate-50 text-slate-400 border-slate-200 line-through'
+                ? 'bg-slate-800 text-slate-200 border-slate-600 shadow-xs' 
+                : 'bg-slate-900/60 text-slate-500 border-slate-800 line-through'
             }`}
           >
-            <span className="w-2.5 h-1 border-t-2 border-dashed border-slate-600"></span>
+            <span className="w-2.5 h-1 border-t-2 border-dashed border-slate-300"></span>
             <span>Scheduled Grid Demand</span>
           </button>
 
-          <span className="text-[11px] text-slate-400 ml-auto italic">
+          <span className="text-[11px] text-slate-400 ml-auto italic hidden sm:inline">
             Tip: Click anywhere along the line to inspect hour details below
           </span>
         </div>
@@ -436,40 +442,40 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
 
       {/* Selected Time-Step Detail Inspector Bar */}
       {activePoint && (
-        <div className="bg-slate-900 text-white p-5 sm:p-6 rounded-2xl shadow-md border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 text-xs">
+        <div className="glass-panel p-5 sm:p-6 rounded-2xl shadow-xl border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 text-xs">
           <div className="flex items-center space-x-3.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-black font-mono text-sm">
+            <div className="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-black font-mono text-sm shadow-xs">
               H+{activePoint.hourOffset}
             </div>
             <div>
-              <div className="flex items-center space-x-2.5">
-                <span className="font-bold text-sm text-white">{activePoint.timeLabel}</span>
-                <span className="text-slate-400 font-medium">({activePoint.dayLabel})</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-bold text-sm text-white font-mono">{activePoint.timeLabel}</span>
+                <span className="text-slate-400 font-medium text-xs">({activePoint.dayLabel})</span>
                 {activePoint.imbalanceSeverity === 'OVER_GENERATION' && (
-                  <span className="px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  <span className="px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono text-[11px]">
                     OVER-GENERATION (+{activePoint.generationDeltaMW} MW)
                   </span>
                 )}
                 {activePoint.imbalanceSeverity === 'UNDER_GENERATION' && (
-                  <span className="px-2.5 py-0.5 rounded-full font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                  <span className="px-2.5 py-0.5 rounded-full font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 font-mono text-[11px]">
                     UNDER-GENERATION ({activePoint.generationDeltaMW} MW)
                   </span>
                 )}
                 {activePoint.imbalanceSeverity === 'STEEP_RAMP_DOWN' && (
-                  <span className="px-2.5 py-0.5 rounded-full font-bold bg-rose-600 text-white">
+                  <span className="px-2.5 py-0.5 rounded-full font-bold bg-rose-600 text-white font-mono text-[11px] shadow-xs">
                     STEEP RAMP DOWN ({activePoint.rampRateMWperHr} MW/h)
                   </span>
                 )}
                 {activePoint.imbalanceSeverity === 'BALANCED' && (
-                  <span className="px-2.5 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-300">
+                  <span className="px-2.5 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono text-[11px]">
                     BALANCED GRID
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">
+              <p className="text-[11px] text-slate-400 mt-1 font-mono">
                 Solar: <strong className="text-amber-300">{activePoint.solarForecast[params.selectedModel]} MW</strong> &bull; 
                 Wind: <strong className="text-cyan-300">{activePoint.windForecast[params.selectedModel]} MW</strong> &bull; 
-                Demand: <strong>{activePoint.gridDemandScheduledMW} MW</strong> &bull; 
+                Demand: <strong className="text-slate-200">{activePoint.gridDemandScheduledMW} MW</strong> &bull; 
                 LMP: <strong className="text-emerald-300">₹{(activePoint.dayAheadLMP * 80).toLocaleString()}/MWh</strong>
               </p>
             </div>
@@ -479,10 +485,10 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
             {activePoint.recommendedAction ? (
               <div className="flex items-center space-x-2.5">
                 <div className="text-right">
-                  <span className="text-[10px] uppercase font-bold text-amber-400 block">
+                  <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">
                     Action Recommended
                   </span>
-                  <span className="font-bold text-white max-w-[260px] truncate block">
+                  <span className="font-bold text-white max-w-[260px] truncate block text-xs">
                     {activePoint.recommendedAction.title}
                   </span>
                 </div>
@@ -492,7 +498,7 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
               </div>
             ) : (
               <div className="text-slate-400 italic text-[11px]">
-                Nominal operations within reserve margins. No intervention required.
+                Nominal operations within reserve margins. No manual intervention required.
               </div>
             )}
           </div>

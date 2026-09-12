@@ -18,19 +18,19 @@ export const DispatchLogModal: React.FC<DispatchLogModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 sm:p-6">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-3xl w-full flex flex-col max-h-[85vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 sm:p-6">
+      <div className="glass-panel rounded-2xl shadow-2xl border border-slate-800 max-w-4xl w-full flex flex-col max-h-[85vh] overflow-hidden">
         {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-5 sm:p-6 border-b border-slate-800/80 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shadow-xs">
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-extrabold text-slate-900 text-sm">
+              <h3 className="font-extrabold text-white text-sm sm:text-base">
                 Auditable Operator Dispatch &amp; Action Log
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-400 mt-0.5">
                 Immutable record of authorized grid curtailments, BESS dispatches, and peaker notifications.
               </p>
             </div>
@@ -38,7 +38,7 @@ export const DispatchLogModal: React.FC<DispatchLogModalProps> = ({
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition"
+            className="w-8 h-8 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -48,16 +48,16 @@ export const DispatchLogModal: React.FC<DispatchLogModalProps> = ({
         <div className="p-5 sm:p-6 flex-grow overflow-y-auto">
           {logs.length === 0 ? (
             <div className="p-10 text-center text-slate-400">
-              <Clock className="w-10 h-10 mx-auto mb-3 text-slate-300" />
-              <p className="font-semibold text-sm text-slate-700">No Dispatches Executed Yet</p>
-              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              <Clock className="w-10 h-10 mx-auto mb-3 text-slate-500" />
+              <p className="font-semibold text-sm text-slate-200">No Dispatches Executed Yet</p>
+              <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">
                 Authorize recommended actions from the Grid Action Center to log active mitigation orders.
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-xl border border-slate-800/80">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className="bg-slate-100 text-slate-700 uppercase font-bold sticky top-0">
+                <thead className="bg-slate-900/90 text-slate-300 uppercase font-bold sticky top-0 font-mono text-[11px]">
                   <tr>
                     <th className="py-2.5 px-3">Order ID</th>
                     <th className="py-2.5 px-3">Timestamp</th>
@@ -68,19 +68,19 @@ export const DispatchLogModal: React.FC<DispatchLogModalProps> = ({
                     <th className="py-2.5 px-3 text-right">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 font-medium">
+                <tbody className="divide-y divide-slate-800/60 font-medium bg-slate-950/40">
                   {logs.map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50">
-                      <td className="py-2.5 px-3 font-mono font-bold text-slate-900">{log.id}</td>
-                      <td className="py-2.5 px-3 text-slate-500">{log.dispatchedAt}</td>
-                      <td className="py-2.5 px-3 font-bold text-slate-800">{log.title}</td>
-                      <td className="py-2.5 px-3 font-mono font-bold text-emerald-700">
+                    <tr key={log.id} className="hover:bg-slate-900/60 transition">
+                      <td className="py-2.5 px-3 font-mono font-bold text-emerald-400">{log.id}</td>
+                      <td className="py-2.5 px-3 text-slate-400 font-mono">{log.dispatchedAt}</td>
+                      <td className="py-2.5 px-3 font-bold text-white">{log.title}</td>
+                      <td className="py-2.5 px-3 font-mono font-bold text-emerald-400">
                         {log.magnitudeMW} MW
                       </td>
-                      <td className="py-2.5 px-3 text-slate-600">{log.targetAsset}</td>
-                      <td className="py-2.5 px-3 font-mono text-slate-500">{log.operator}</td>
+                      <td className="py-2.5 px-3 text-slate-300">{log.targetAsset}</td>
+                      <td className="py-2.5 px-3 font-mono text-slate-400">{log.operator}</td>
                       <td className="py-2.5 px-3 text-right">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                        <span className="px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono">
                           {log.status}
                         </span>
                       </td>
@@ -93,16 +93,16 @@ export const DispatchLogModal: React.FC<DispatchLogModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-5 sm:p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50">
-          <span className="text-xs text-slate-500">
-            Total Logged Events: <strong className="text-slate-800">{logs.length}</strong>
+        <div className="p-4 sm:p-5 border-t border-slate-800/80 flex items-center justify-between bg-slate-950/60">
+          <span className="text-xs text-slate-400">
+            Total Logged Events: <strong className="text-slate-200 font-mono">{logs.length}</strong>
           </span>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2.5">
             {logs.length > 0 && (
               <button
                 onClick={onClearLogs}
-                className="flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-bold transition"
+                className="flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-bold transition cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Clear History</span>
@@ -110,7 +110,7 @@ export const DispatchLogModal: React.FC<DispatchLogModalProps> = ({
             )}
             <button
               onClick={onClose}
-              className="px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white transition"
+              className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition cursor-pointer border border-slate-700"
             >
               Close
             </button>

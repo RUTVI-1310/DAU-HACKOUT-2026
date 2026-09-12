@@ -143,7 +143,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800 font-sans flex flex-col antialiased">
+    <div className="min-h-screen bg-grid-ambient text-slate-100 font-sans flex flex-col antialiased selection:bg-emerald-500/30 selection:text-emerald-300 relative">
       {/* 1. Global Navigation & Simulation Control Bar */}
       <Navbar
         params={params}
@@ -156,85 +156,85 @@ export default function App() {
         onResetScenarios={handleResetScenarios}
       />
 
-      {/* 2. Workspace Tabs Navigation */}
-      <div className="bg-white border-b border-slate-200 sticky top-[97px] lg:top-[65px] z-30 shadow-xs">
+      {/* 2. Workspace Tabs Navigation (Glass Command Ribbon) */}
+      <div className="bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80 sticky top-[103px] xl:top-[69px] z-30 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex gap-2 sm:gap-3.5 lg:gap-4 overflow-x-auto text-xs sm:text-sm font-semibold py-2.5 sm:py-3 scrollbar-none">
+          <nav className="flex gap-2 sm:gap-3 lg:gap-3.5 overflow-x-auto text-xs sm:text-sm font-semibold py-2.5 sm:py-3 scrollbar-none">
             <button
               id="tab-btn-forecast"
               onClick={() => setActiveTab('forecast')}
-              className={`py-2.5 px-3.5 sm:px-4 rounded-xl flex items-center space-x-2 whitespace-nowrap transition ${
+              className={`py-2 px-3.5 sm:px-4 rounded-xl flex items-center space-x-2 whitespace-nowrap transition-all duration-200 cursor-pointer ${
                 activeTab === 'forecast'
-                  ? 'bg-emerald-50 text-emerald-700 font-bold border border-emerald-300 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
+                  ? 'bg-emerald-500/15 text-emerald-300 font-bold border border-emerald-500/40 shadow-sm shadow-emerald-500/10'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
               }`}
             >
-              <BarChart3 className="w-4 h-4 text-emerald-600" />
+              <BarChart3 className={`w-4 h-4 ${activeTab === 'forecast' ? 'text-emerald-400' : 'text-slate-400'}`} />
               <span>Forecast Studio &amp; AI Grid Actions</span>
             </button>
 
             <button
               id="tab-btn-weather"
               onClick={() => setActiveTab('weather')}
-              className={`py-2.5 px-3.5 sm:px-4 rounded-xl flex items-center space-x-2 whitespace-nowrap transition ${
+              className={`py-2 px-3.5 sm:px-4 rounded-xl flex items-center space-x-2 whitespace-nowrap transition-all duration-200 cursor-pointer ${
                 activeTab === 'weather'
-                  ? 'bg-emerald-50 text-emerald-700 font-bold border border-emerald-300 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
+                  ? 'bg-amber-500/15 text-amber-300 font-bold border border-amber-500/40 shadow-sm shadow-amber-500/10'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
               }`}
             >
-              <CloudSun className="w-4 h-4 text-amber-500" />
+              <CloudSun className={`w-4 h-4 ${activeTab === 'weather' ? 'text-amber-400' : 'text-slate-400'}`} />
               <span>Satellite &amp; Weather Telemetry</span>
             </button>
 
             <button
               id="tab-btn-whatif"
               onClick={() => setActiveTab('whatif')}
-              className={`py-2.5 px-3.5 sm:px-4 rounded-xl flex items-center space-x-2 whitespace-nowrap transition ${
+              className={`py-2 px-3.5 sm:px-4 rounded-xl flex items-center space-x-2 whitespace-nowrap transition-all duration-200 cursor-pointer ${
                 activeTab === 'whatif'
-                  ? 'bg-emerald-50 text-emerald-700 font-bold border border-emerald-300 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
+                  ? 'bg-cyan-500/15 text-cyan-300 font-bold border border-cyan-500/40 shadow-sm shadow-cyan-500/10'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
               }`}
             >
-              <Sliders className="w-4 h-4 text-cyan-600" />
+              <Sliders className={`w-4 h-4 ${activeTab === 'whatif' ? 'text-cyan-400' : 'text-slate-400'}`} />
               <span>"What-If" Contingency Studio</span>
             </button>
 
             <button
               id="tab-btn-trading"
               onClick={() => setActiveTab('trading')}
-              className={`py-2.5 px-3.5 sm:px-4 rounded-xl flex items-center space-x-2 whitespace-nowrap transition ${
+              className={`py-2 px-3.5 sm:px-4 rounded-xl flex items-center space-x-2 whitespace-nowrap transition-all duration-200 cursor-pointer ${
                 activeTab === 'trading'
-                  ? 'bg-emerald-50 text-emerald-700 font-bold border border-emerald-300 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
+                  ? 'bg-emerald-500/15 text-emerald-300 font-bold border border-emerald-500/40 shadow-sm shadow-emerald-500/10'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
               }`}
             >
-              <IndianRupee className="w-4 h-4 text-emerald-600" />
+              <IndianRupee className={`w-4 h-4 ${activeTab === 'trading' ? 'text-emerald-400' : 'text-slate-400'}`} />
               <span>Energy Trading &amp; BESS Arbitrage</span>
             </button>
 
             <button
               id="tab-btn-portfolio"
               onClick={() => setActiveTab('portfolio')}
-              className={`py-2.5 px-3.5 sm:px-4 rounded-xl flex items-center space-x-2 whitespace-nowrap transition ${
+              className={`py-2 px-3.5 sm:px-4 rounded-xl flex items-center space-x-2 whitespace-nowrap transition-all duration-200 cursor-pointer ${
                 activeTab === 'portfolio'
-                  ? 'bg-emerald-50 text-emerald-700 font-bold border border-emerald-300 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
+                  ? 'bg-purple-500/15 text-purple-300 font-bold border border-purple-500/40 shadow-sm shadow-purple-500/10'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
               }`}
             >
-              <Layers className="w-4 h-4 text-purple-600" />
+              <Layers className={`w-4 h-4 ${activeTab === 'portfolio' ? 'text-purple-400' : 'text-slate-400'}`} />
               <span>Plant Portfolio ({FLEET_PLANTS.length} Sites)</span>
             </button>
 
             <button
               id="tab-btn-methodology"
               onClick={() => setActiveTab('methodology')}
-              className={`py-2.5 px-3.5 sm:px-4 rounded-xl flex items-center space-x-2 whitespace-nowrap transition ${
+              className={`py-2 px-3.5 sm:px-4 rounded-xl flex items-center space-x-2 whitespace-nowrap transition-all duration-200 cursor-pointer ${
                 activeTab === 'methodology'
-                  ? 'bg-emerald-50 text-emerald-700 font-bold border border-emerald-300 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
+                  ? 'bg-blue-500/15 text-blue-300 font-bold border border-blue-500/40 shadow-sm shadow-blue-500/10'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
               }`}
             >
-              <BookOpen className="w-4 h-4 text-slate-500" />
+              <BookOpen className={`w-4 h-4 ${activeTab === 'methodology' ? 'text-blue-400' : 'text-slate-400'}`} />
               <span>Methodology &amp; Architecture</span>
             </button>
           </nav>
@@ -277,24 +277,33 @@ export default function App() {
             />
 
             {/* Meteorological Physics Explainer Card */}
-            <div className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
-                <strong className="block text-slate-900 font-bold mb-1">Global Horizontal Irradiance (GHI)</strong>
-                <p className="text-slate-600 leading-relaxed">
+            <div className="glass-panel p-6 sm:p-7 rounded-2xl border border-slate-800 shadow-xl grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
+              <div className="p-4 bg-slate-900/80 rounded-xl border border-slate-800/80 space-y-1.5 hover:border-slate-700 transition">
+                <strong className="block text-slate-100 font-bold mb-1 flex items-center space-x-1.5">
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Global Horizontal Irradiance (GHI)</span>
+                </strong>
+                <p className="text-slate-400 leading-relaxed">
                   Sum of direct beam (DNI × cos θ_z) and diffuse sky radiation (DHI). Governs photovoltaic module electron-hole pair generation.
                 </p>
               </div>
 
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
-                <strong className="block text-slate-900 font-bold mb-1">Hub-Height Wind Shear (100m)</strong>
-                <p className="text-slate-600 leading-relaxed">
+              <div className="p-4 bg-slate-900/80 rounded-xl border border-slate-800/80 space-y-1.5 hover:border-slate-700 transition">
+                <strong className="block text-slate-100 font-bold mb-1 flex items-center space-x-1.5">
+                  <Wind className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Hub-Height Wind Shear (100m)</span>
+                </strong>
+                <p className="text-slate-400 leading-relaxed">
                   Standard power law wind shear profiles v(z) = v_0 · (z/z_0)^α extrapolate ground anemometers up to modern 100m–150m wind turbine rotor centers.
                 </p>
               </div>
 
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
-                <strong className="block text-slate-900 font-bold mb-1">Air Density Correction (ρ)</strong>
-                <p className="text-slate-600 leading-relaxed">
+              <div className="p-4 bg-slate-900/80 rounded-xl border border-slate-800/80 space-y-1.5 hover:border-slate-700 transition">
+                <strong className="block text-slate-100 font-bold mb-1 flex items-center space-x-1.5">
+                  <Activity className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Air Density Correction (ρ)</span>
+                </strong>
+                <p className="text-slate-400 leading-relaxed">
                   Kinetic wind power scales directly with air mass density ρ = P / (R · T). Cold winter air delivers up to 12% higher turbine power than hot summer air.
                 </p>
               </div>
@@ -339,80 +348,80 @@ export default function App() {
 
         {/* TAB 6: Methodology & Architecture Reference */}
         {activeTab === 'methodology' && (
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-sm space-y-6 text-xs text-slate-700 leading-relaxed">
+          <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-800/80 shadow-xl space-y-6 text-xs text-slate-300 leading-relaxed">
             <div>
-              <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
+              <h3 className="text-base font-extrabold text-white tracking-tight">
                 Forecasting Science, Machine Learning Pipeline &amp; Industry Standards
               </h3>
-              <p className="text-slate-500 mt-0.5">
+              <p className="text-slate-400 mt-0.5 font-medium">
                 Technical foundation of the multi-model time-series ensemble and automated grid action decision matrix.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+              <div className="p-4 bg-slate-900/80 rounded-xl border border-slate-800/80 space-y-2.5">
                 <div className="flex items-center space-x-2">
-                  <div className="w-7 h-7 rounded-lg bg-pink-100 text-pink-700 flex items-center justify-center font-bold text-xs">
+                  <div className="w-7 h-7 rounded-lg bg-pink-500/20 text-pink-400 border border-pink-500/30 flex items-center justify-center font-bold text-xs">
                     FB
                   </div>
-                  <strong className="text-slate-900 text-sm">Prophet Harmonic Decomposition</strong>
+                  <strong className="text-white text-sm">Prophet Harmonic Decomposition</strong>
                 </div>
-                <p>
+                <p className="text-slate-400">
                   Decomposes time-series into trend $g(t)$, periodic diurnal/seasonal harmonics $s(t)$, and holiday effects $h(t)$:
                 </p>
-                <div className="bg-slate-900 text-emerald-400 p-2.5 rounded font-mono text-[11px] text-center">
+                <div className="bg-slate-950 border border-slate-800 text-emerald-400 p-2.5 rounded-lg font-mono text-[11px] text-center shadow-inner">
                   y(t) = g(t) + s(t) + h(t) + ε_t
                 </div>
-                <p>
+                <p className="text-slate-400">
                   Particularly resilient against missing SCADA timestamps and captures smooth daily diurnal solar peaks and weekly industrial demand shifts.
                 </p>
               </div>
 
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+              <div className="p-4 bg-slate-900/80 rounded-xl border border-slate-800/80 space-y-2.5">
                 <div className="flex items-center space-x-2">
-                  <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">
+                  <div className="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold text-xs">
                     NN
                   </div>
-                  <strong className="text-slate-900 text-sm">LSTM Recurrent Deep Neural Network</strong>
+                  <strong className="text-white text-sm">LSTM Recurrent Deep Neural Network</strong>
                 </div>
-                <p>
+                <p className="text-slate-400">
                   Utilizes cell memory states and gating mechanisms (Input, Forget, Output gates) to capture sequential atmospheric front momentum:
                 </p>
-                <div className="bg-slate-900 text-emerald-400 p-2.5 rounded font-mono text-[11px] text-center">
+                <div className="bg-slate-950 border border-slate-800 text-emerald-400 p-2.5 rounded-lg font-mono text-[11px] text-center shadow-inner">
                   f_t = σ(W_f · [h_(t-1), x_t] + b_f)
                 </div>
-                <p>
+                <p className="text-slate-400">
                   Excels at predicting rapid Duck-Curve ramping events, sudden thunderstorm cloud arrivals, and gust front turbulence persistence.
                 </p>
               </div>
 
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+              <div className="p-4 bg-slate-900/80 rounded-xl border border-slate-800/80 space-y-2.5">
                 <div className="flex items-center space-x-2">
-                  <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
+                  <div className="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center font-bold text-xs">
                     GB
                   </div>
-                  <strong className="text-slate-900 text-sm">XGBoost Gradient Boosted Trees</strong>
+                  <strong className="text-white text-sm">XGBoost Gradient Boosted Trees</strong>
                 </div>
-                <p>
+                <p className="text-slate-400">
                   Greedy tree-building algorithm minimizing regularized loss over non-linear meteorological feature interactions:
                 </p>
-                <div className="bg-slate-900 text-emerald-400 p-2.5 rounded font-mono text-[11px] text-center">
+                <div className="bg-slate-950 border border-slate-800 text-emerald-400 p-2.5 rounded-lg font-mono text-[11px] text-center shadow-inner">
                   Obj = Σ l(y_i, ŷ_i) + Σ Ω(f_k)
                 </div>
-                <p>
+                <p className="text-slate-400">
                   Handles non-linear aerodynamic power curve cutoffs (v_cut-in, v_rated, v_cut-out) and solar inverter clipping limits cleanly.
                 </p>
               </div>
             </div>
 
             {/* Industrial Protocols Table */}
-            <div className="border-t border-slate-100 pt-4">
-              <h4 className="font-bold text-slate-900 text-sm mb-2">
-                Standard Telemetry Protocol &amp; Regulatory Compliance
+            <div className="border-t border-slate-800/80 pt-4">
+              <h4 className="font-bold text-white text-sm mb-2.5 flex items-center space-x-2">
+                <span>Standard Telemetry Protocol &amp; Regulatory Compliance</span>
               </h4>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto rounded-xl border border-slate-800/80">
                 <table className="w-full text-left border-collapse text-xs">
-                  <thead className="bg-slate-100 text-slate-700 font-bold uppercase">
+                  <thead className="bg-slate-900/90 text-slate-300 font-bold uppercase tracking-wider text-[11px]">
                     <tr>
                       <th className="py-2.5 px-3">Standard</th>
                       <th className="py-2.5 px-3">Scope &amp; Logical Node</th>
@@ -420,30 +429,30 @@ export default function App() {
                       <th className="py-2.5 px-3">Operational Grid Impact</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 font-medium">
-                    <tr>
-                      <td className="py-2 px-3 font-bold text-emerald-700">IEC 61400-25</td>
-                      <td className="py-2 px-3 font-mono">WT_ActivePower (P_Act)</td>
-                      <td className="py-2 px-3">Wind Turbine Output (MW)</td>
-                      <td className="py-2 px-3 text-slate-500">Scheduled generation matching and ramp-rate surveillance</td>
+                  <tbody className="divide-y divide-slate-800/60 font-medium bg-slate-950/40">
+                    <tr className="hover:bg-slate-900/50 transition">
+                      <td className="py-2.5 px-3 font-bold text-emerald-400">IEC 61400-25</td>
+                      <td className="py-2.5 px-3 font-mono text-slate-300">WT_ActivePower (P_Act)</td>
+                      <td className="py-2.5 px-3 text-slate-200">Wind Turbine Output (MW)</td>
+                      <td className="py-2.5 px-3 text-slate-400">Scheduled generation matching and ramp-rate surveillance</td>
                     </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-bold text-amber-700">IEC 61724-1</td>
-                      <td className="py-2 px-3 font-mono">POA_Irradiance / T_Mod</td>
-                      <td className="py-2 px-3">Plane-of-Array &amp; Cell Temp</td>
-                      <td className="py-2 px-3 text-slate-500">Photovoltaic performance ratio ($PR$) and thermal derating validation</td>
+                    <tr className="hover:bg-slate-900/50 transition">
+                      <td className="py-2.5 px-3 font-bold text-amber-400">IEC 61724-1</td>
+                      <td className="py-2.5 px-3 font-mono text-slate-300">POA_Irradiance / T_Mod</td>
+                      <td className="py-2.5 px-3 text-slate-200">Plane-of-Array &amp; Cell Temp</td>
+                      <td className="py-2.5 px-3 text-slate-400">Photovoltaic performance ratio ($PR$) and thermal derating validation</td>
                     </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-bold text-cyan-700">IEEE 1547-2018</td>
-                      <td className="py-2 px-3 font-mono">Volt-VAr / Freq-Watt</td>
-                      <td className="py-2 px-3">Inverter Autonomous Response</td>
-                      <td className="py-2 px-3 text-slate-500">Active curtailment and fast frequency response ($FFR$) regulation</td>
+                    <tr className="hover:bg-slate-900/50 transition">
+                      <td className="py-2.5 px-3 font-bold text-cyan-400">IEEE 1547-2018</td>
+                      <td className="py-2.5 px-3 font-mono text-slate-300">Volt-VAr / Freq-Watt</td>
+                      <td className="py-2.5 px-3 text-slate-200">Inverter Autonomous Response</td>
+                      <td className="py-2.5 px-3 text-slate-400">Active curtailment and fast frequency response ($FFR$) regulation</td>
                     </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-bold text-purple-700">FERC Order 888</td>
-                      <td className="py-2 px-3 font-mono">Day-Ahead Scheduling</td>
-                      <td className="py-2 px-3">Imbalance Energy Settlement</td>
-                      <td className="py-2 px-3 text-slate-500">Penalizes deviation exceeding ±10% bandwidth from day-ahead schedule</td>
+                    <tr className="hover:bg-slate-900/50 transition">
+                      <td className="py-2.5 px-3 font-bold text-purple-400">FERC Order 888</td>
+                      <td className="py-2.5 px-3 font-mono text-slate-300">Day-Ahead Scheduling</td>
+                      <td className="py-2.5 px-3 text-slate-200">Imbalance Energy Settlement</td>
+                      <td className="py-2.5 px-3 text-slate-400">Penalizes deviation exceeding ±10% bandwidth from day-ahead schedule</td>
                     </tr>
                   </tbody>
                 </table>
@@ -454,10 +463,10 @@ export default function App() {
       </main>
 
       {/* 4. Footer */}
-      <footer className="bg-slate-900 text-slate-400 text-xs py-7 border-t border-slate-800 mt-auto">
+      <footer className="bg-slate-950/90 text-slate-400 text-xs py-7 border-t border-slate-800/80 mt-auto backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-5">
           <div className="flex items-center space-x-3.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-1 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-1 flex items-center justify-center shadow-xs">
               <img 
                 src="/gridsense-logo.png" 
                 alt="GridSense AI" 
