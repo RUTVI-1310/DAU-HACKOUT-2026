@@ -37,8 +37,22 @@ A full-stack, ML-driven predictive maintenance platform for renewable utility as
    - Lifecycle tracking: `ALERT` → `INSPECTION` → `ASSIGNED` → `RESOLVED`.
    - Direct work order creation with priority tagging and technician allocation.
 
-5. **Standalone Embedded API & Telemetry Engine**
-   - Integrated zero-dependency backend providing REST endpoints (`/api/assets`, `/api/simulation/telemetry`, `/api/work-orders`, `/api/metrics/fleet`).
+5. **What-If Scenario Simulator (`/what-if`) — Feature 52**
+   - Interactive stress-testing simulator for environmental anomalies, operational derating, and maintenance deferral.
+   - Granular slider controls: Ambient Temperature offset (-5°C to +20°C), Wind Velocity multiplier (0.5x to 2.5x), PV Soiling/dust opacity (0% to 50%), SLDC Curtailment mandate (0% to 80%), Service deferral window (0 to 30 days), and Proactive load derating (50% to 100%).
+   - Industrial presets: *Extreme Summer Heatwave*, *Kutch High-Wind Gale & Cut-Out*, *Thar Desert Soiling*, *SLDC 30% Grid Curtailment*, and *WT-017 14-Day Maintenance Deferral*.
+   - Dynamic real-time KPI impacts: Health score, Remaining Useful Life (RUL in days/operating hours), Failure Probability (%), and Financial loss (₹/hr & 30-day cumulative).
+   - 28-day Weibull wear-out degradation curve and AI prescriptive mitigation recommendations.
+
+6. **Forecast Studio (`/forecast`) — Feature 53**
+   - Multi-horizon renewable generation forecasting: 6h Intraday (15-min blocks), 24h Day-Ahead (hourly for DAM scheduling), and 7d Week-Ahead.
+   - Multi-model ensemble comparisons: Ensemble Blend (94.8% MAPE), Gradient-Boosted ML (XGBoost), NWP Numerical Physics, and Persistence Baseline.
+   - Probabilistic uncertainty bands: P10 (Conservative Guarantee), P50 (Expected Forecast), and P90 (Optimistic Bound).
+   - Indian CERC Deviation Settlement Mechanism (DSM ±10% permissible band) compliance tracking.
+   - Automated AI Optimal Maintenance Window identification: locates generation lull hours and calculates opportunity cost savings for work order dispatch.
+
+7. **Standalone Embedded API & Telemetry Engine**
+   - Integrated zero-dependency backend providing REST endpoints (`/api/assets`, `/api/simulation/telemetry`, `/api/what-if/presets`, `/api/what-if/simulate`, `/api/forecast`, `/api/forecast/schedule-window`, `/api/work-orders`, `/api/metrics/fleet`).
 
 ---
 

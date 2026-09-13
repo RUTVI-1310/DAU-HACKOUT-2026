@@ -420,3 +420,51 @@ VALUES
 INSERT INTO anomaly_events (asset_id, detected_at, anomaly_score, root_cause, severity, vibration_deviation_pct, temperature_deviation_pct, power_loss_mw, hourly_financial_loss_inr, model_version, is_acknowledged, work_order_created)
 VALUES
     ('WT-017', NOW() - INTERVAL '25 MINUTES', 0.843, 'Bearing degradation', 'P1', 31.00, 8.40, 0.350, 2100.00, 'IsolationForest-v1.4', TRUE, TRUE);
+
+-- ====================================================================
+-- 8. FEATURE 52: What-If Scenario Presets
+-- ====================================================================
+
+CREATE TABLE IF NOT EXISTS what_if_scenarios (
+    id VARCHAR(64) PRIMARY KEY,
+    name TEXT NOT NULL,
+    category VARCHAR(64) NOT NULL,
+    description TEXT NOT NULL,
+    temperature_offset NUMERIC DEFAULT 0,
+    wind_speed_factor NUMERIC DEFAULT 1.0,
+    irradiance_factor NUMERIC DEFAULT 1.0,
+    soiling_factor NUMERIC DEFAULT 0,
+    curtailment_pct NUMERIC DEFAULT 0,
+    maintenance_delay_days INTEGER DEFAULT 0,
+    derate_pct NUMERIC DEFAULT 100,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+INSERT INTO what_if_scenarios (id, name, category, description, temperature_offset, wind_speed_factor, irradiance_factor, soiling_factor, curtailment_pct, maintenance_delay_days, derate_pct)
+VALUES
+    ('heatwave', 'Extreme Summer Heatwave', 'Environmental', '+8°C ambient temperature rise causing inverter thermal derating and solar PV cell degradation (-0.4%/°C).', 8.0, 1.0, 1.05, 5.0, 0.0, 0, 100.0),
+    ('gale_wind', 'Kutch High-Wind Gale & Cut-Out', 'Aerodynamic', 'Wind speed gusts reaching 23.5 m/s near cut-out threshold (25 m/s), triggering blade pitch feathering and vibration alerts.', 1.0, 1.9, 0.9, 10.0, 0.0, 0, 100.0),
+    ('dust_soiling', 'Thar Desert Soiling & Dust Storm', 'Environmental', '+35% heavy particulate accumulation on solar arrays and nacelle air filters in Rajasthan/Gujarat.', 3.0, 1.1, 0.75, 35.0, 0.0, 0, 100.0),
+    ('grid_curtailment', 'SLDC 30% Peak Grid Curtailment', 'Grid Directive', 'State Load Dispatch Center (SLDC) orders mandatory 30% active power curtailment due to regional transmission congestion.', 0.0, 1.0, 1.0, 0.0, 30.0, 0, 70.0),
+    ('maintenance_deferral', 'WT-017 14-Day Maintenance Deferral', 'Operations & Risk', 'Simulates operating WT-017 with existing drive-train vibration for 14 additional days without technician intervention.', 4.0, 1.15, 1.0, 0.0, 0.0, 14, 100.0)
+ON CONFLICT (id) DO NOTHING;
+
+-- ====================================================================
+-- 9. FEATURE 53: Generation Forecast Logs & Dispatch Windows
+-- ====================================================================
+
+CREATE TABLE IF NOT EXISTS generation_forecasts (
+    id SERIAL PRIMARY KEY,
+    asset_id VARCHAR(32) NOT NULL,
+    forecast_horizon VARCHAR(16) NOT NULL,
+    model_type VARCHAR(32) NOT NULL,
+    timestamp TIMESTAMPTZ NOT NULL,
+    expected_power_mw NUMERIC NOT NULL,
+    optimistic_power_mw NUMERIC NOT NULL,
+    pessimistic_power_mw NUMERIC NOT NULL,
+    dsm_lower_bound_mw NUMERIC NOT NULL,
+    dsm_upper_bound_mw NUMERIC NOT NULL,
+    tariff_inr_per_kwh NUMERIC NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+

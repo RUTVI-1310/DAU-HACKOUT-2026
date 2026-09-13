@@ -106,6 +106,389 @@ function assessTelemetry(telemetry, type = "WIND") {
   };
 }
 
+// -------------------------------------------------------------
+// FEATURE 52: What-If Scenario Presets & Simulation Calculations
+// -------------------------------------------------------------
+const whatIfPresets = [
+  {
+    id: "heatwave",
+    name: "Extreme Summer Heatwave",
+    category: "Environmental",
+    badge: "Thermal Derating",
+    description: "+8°C ambient temperature rise causing inverter thermal derating and solar PV cell degradation (-0.4%/°C).",
+    params: {
+      temperatureOffset: 8,
+      windSpeedFactor: 1.0,
+      irradianceFactor: 1.05,
+      soilingFactor: 5,
+      curtailmentPct: 0,
+      maintenanceDelayDays: 0,
+      deratePct: 100,
+    }
+  },
+  {
+    id: "gale_wind",
+    name: "Kutch High-Wind Gale & Cut-Out",
+    category: "Aerodynamic",
+    badge: "Aerodynamic Stall",
+    description: "Wind speed gusts reaching 23.5 m/s near cut-out threshold (25 m/s), triggering blade pitch feathering and vibration alerts.",
+    params: {
+      temperatureOffset: 1,
+      windSpeedFactor: 1.9,
+      irradianceFactor: 0.9,
+      soilingFactor: 10,
+      curtailmentPct: 0,
+      maintenanceDelayDays: 0,
+      deratePct: 100,
+    }
+  },
+  {
+    id: "dust_soiling",
+    name: "Thar Desert Soiling & Dust Storm",
+    category: "Environmental",
+    badge: "Optical Loss",
+    description: "+35% heavy particulate accumulation on solar arrays and nacelle air filters in Rajasthan/Gujarat.",
+    params: {
+      temperatureOffset: 3,
+      windSpeedFactor: 1.1,
+      irradianceFactor: 0.75,
+      soilingFactor: 35,
+      curtailmentPct: 0,
+      maintenanceDelayDays: 0,
+      deratePct: 100,
+    }
+  },
+  {
+    id: "grid_curtailment",
+    name: "SLDC 30% Peak Grid Curtailment",
+    category: "Grid Directive",
+    badge: "Grid Mandate",
+    description: "State Load Dispatch Center (SLDC) orders mandatory 30% active power curtailment due to regional transmission congestion.",
+    params: {
+      temperatureOffset: 0,
+      windSpeedFactor: 1.0,
+      irradianceFactor: 1.0,
+      soilingFactor: 0,
+      curtailmentPct: 30,
+      maintenanceDelayDays: 0,
+      deratePct: 70,
+    }
+  },
+  {
+    id: "maintenance_deferral",
+    name: "WT-017 14-Day Maintenance Deferral",
+    category: "Operations & Risk",
+    badge: "Catastrophic Risk",
+    description: "Simulates operating WT-017 with existing drive-train vibration for 14 additional days without technician intervention.",
+    params: {
+      assetId: "WT-017",
+      temperatureOffset: 4,
+      windSpeedFactor: 1.15,
+      irradianceFactor: 1.0,
+      soilingFactor: 0,
+      curtailmentPct: 0,
+      maintenanceDelayDays: 14,
+      deratePct: 100,
+    }
+  }
+];
+
+function runWhatIfSimulation(params = {}) {
+  const assetId = params.assetId || "WT-017";
+  const tempOffset = Number(params.temperatureOffset ?? 0);
+  const windFactor = Number(params.windSpeedFactor ?? 1.0);
+  const irradianceFactor = Number(params.irradianceFactor ?? 1.0);
+  const soilingFactor = Number(params.soilingFactor ?? 0);
+  const curtailmentPct = Math.max(0, Math.min(80, Number(params.curtailmentPct ?? 0)));
+  const delayDays = Math.max(0, Math.min(30, Number(params.maintenanceDelayDays ?? 0)));
+  const deratePct = Math.max(40, Math.min(100, Number(params.deratePct ?? 100)));
+
+  const asset = store.assets.find(a => a.id === assetId) || store.assets[0];
+  const isWind = asset.type === "WIND";
+
+  // Baseline telemetry
+  const baseTemp = isWind ? 64.0 : 42.0;
+  const baseVib = isWind ? (assetId === "WT-017" ? 4.3 : 3.1) : 0.8;
+  const baseWind = 11.2;
+  const basePower = asset.currentPower;
+  const cap = asset.capacity;
+
+  // Simulated telemetry
+  const simTemp = Number((baseTemp + tempOffset + (delayDays * 0.45) - ((100 - deratePct) * 0.08)).toFixed(2));
+  
+  // Vibration increases with wind speed, temperature stress, and exponentially with maintenance delay
+  const delayFatigueMultiplier = 1.0 + Math.pow(delayDays / 8.5, 1.6) * 0.42;
+  const derateRelief = deratePct / 100.0;
+  const simVib = Number((baseVib * (isWind ? (windFactor > 1.8 ? 1.45 : windFactor > 1.2 ? 1.2 : 1.0) : 1.0) * delayFatigueMultiplier * (0.6 + 0.4 * derateRelief)).toFixed(2));
+
+  // Wind speed & high wind cut-off (25 m/s)
+  const simWind = Number((baseWind * windFactor).toFixed(2));
+  let windCutOut = false;
+  if (isWind && simWind >= 25.0) {
+    windCutOut = true;
+  }
+
+  // Power output calculation
+  let unconstrainedPower = basePower;
+  if (isWind) {
+    if (windCutOut) {
+      unconstrainedPower = 0.0;
+    } else {
+      // Aerodynamic cubic curve capped at capacity
+      const windEfficiency = Math.min(1.0, Math.pow(Math.min(simWind, 13.0) / 11.2, 2.5));
+      unconstrainedPower = Math.min(cap, cap * windEfficiency);
+      // Thermal derating penalty if temp > 72°C
+      if (simTemp > 72) {
+        unconstrainedPower *= (1 - (simTemp - 72) * 0.015);
+      }
+    }
+  } else {
+    // Solar: irradiance factor, soiling loss, and panel thermal coefficient -0.4%/°C above 25°C
+    const thermalLoss = Math.max(0, (simTemp - 25) * 0.004);
+    const opticalLoss = soilingFactor / 100.0;
+    unconstrainedPower = Math.min(cap, cap * 0.92 * irradianceFactor * (1 - opticalLoss) * (1 - thermalLoss));
+  }
+
+  // Apply intentional derating & curtailment
+  let simPower = unconstrainedPower * (deratePct / 100.0);
+  if (curtailmentPct > 0) {
+    simPower *= (1 - curtailmentPct / 100.0);
+  }
+  simPower = Math.max(0, Number(simPower.toFixed(3)));
+
+  // Health Score Calculation under stress
+  const vibImpact = Math.max(0, (simVib - 3.2) * 14.0);
+  const tempImpact = Math.max(0, (simTemp - (isWind ? 65 : 45)) * 2.8);
+  const delayImpact = delayDays * 2.4;
+  const simHealth = Math.max(12, Math.min(100, Math.round(asset.health - vibImpact - tempImpact - delayImpact + (100 - deratePct) * 0.15)));
+
+  // Remaining Useful Life (RUL) estimation in days
+  let simRulDays = Math.max(1.5, Number(((simHealth / 100.0) * 120 / delayFatigueMultiplier * (1.1 - (1 - derateRelief) * 0.3)).toFixed(1)));
+  if (simHealth < 35 || simVib > 6.0) simRulDays = Math.max(0.8, Number((simRulDays * 0.35).toFixed(1)));
+
+  // Failure Probability (%)
+  const failureProbability = Number(Math.min(96.5, Math.max(2.1, (100 - simHealth) * 0.88 + (delayDays * 1.8) + (simVib > 5.0 ? 25 : 0))).toFixed(1));
+
+  // Financial Revenue & Loss
+  const expectedPower = asset.expectedPower;
+  const powerLossMW = Math.max(0, Number((expectedPower - simPower).toFixed(3)));
+  const hourlyLossINR = Math.round(powerLossMW * 1000 * 6.0);
+  const cumulative30DayLossINR = Math.round(hourlyLossINR * 24 * 30);
+  const catastrophicRepairRiskINR = failureProbability > 60 ? 3850000 : failureProbability > 30 ? 1250000 : 0;
+
+  // Status & Risk Classification
+  let simStatus = "HEALTHY";
+  if (simHealth < 35 || failureProbability > 70) simStatus = "CRITICAL";
+  else if (simHealth < 55 || failureProbability > 40) simStatus = "WARNING";
+  else if (simHealth < 75 || failureProbability > 20) simStatus = "WATCH";
+
+  const simRisk = simStatus === "CRITICAL" || simStatus === "WARNING" ? "HIGH" : simStatus === "WATCH" ? "MEDIUM" : "LOW";
+
+  // Prescriptive AI Recommendation
+  let prescriptiveAction = "Maintain standard operating profile and routine monitoring schedule.";
+  if (windCutOut) {
+    prescriptiveAction = "CRITICAL: Wind speeds exceeding 25.0 m/s cut-out threshold. Feather blades and engage hydrodynamic pitch brakes immediately to prevent mechanical overspeed.";
+  } else if (delayDays >= 10 && failureProbability > 65) {
+    prescriptiveAction = `URGENT: Maintenance deferral of ${delayDays} days elevates catastrophic gearbox/bearing seizure risk to ${failureProbability}%. Proactively derate unit to ${Math.min(deratePct, 70)}% and dispatch emergency repair team within 24 hours to avoid ₹38.5 Lakhs replacement cost.`;
+  } else if (simTemp > 74) {
+    prescriptiveAction = "High thermal excursion detected. Activate auxiliary heat-exchanger pumps or throttle active power output by 15% to limit stator winding degradation.";
+  } else if (soilingFactor >= 20) {
+    prescriptiveAction = `Severe array soiling is causing ${powerLossMW} MW generation curtailment (loss of ₹${hourlyLossINR}/hr). Dispatch automated water-spray washing units to recover output.`;
+  } else if (curtailmentPct > 0) {
+    prescriptiveAction = `SLDC ${curtailmentPct}% active power curtailment in effect. Divert ${powerLossMW} MW excess energy to on-site BESS (Battery Energy Storage System) to preserve revenue.`;
+  }
+
+  // Trajectory over 14 ticks / days
+  const trajectory = Array.from({ length: 14 }, (_, i) => {
+    const day = i * 2;
+    const dayHealth = Math.max(8, Math.round(simHealth - (day * (failureProbability / 35.0))));
+    const dayPower = Math.max(0.1, Number((simPower * (1 - (day * 0.015))).toFixed(2)));
+    const dayVib = Number((simVib + day * 0.12).toFixed(2));
+    const dayTemp = Number((simTemp + Math.sin(day) * 1.5).toFixed(1));
+    return {
+      day: `Day ${day}`,
+      baselineHealth: Math.max(20, Math.round(asset.health - day * 0.8)),
+      simulatedHealth: dayHealth,
+      baselinePower: asset.currentPower,
+      simulatedPower: dayPower,
+      vibration: dayVib,
+      temperature: dayTemp,
+    };
+  });
+
+  return {
+    params: { assetId, tempOffset, windFactor, irradianceFactor, soilingFactor, curtailmentPct, delayDays, deratePct },
+    asset: { id: asset.id, type: asset.type, location: asset.location, capacity: asset.capacity },
+    baseline: {
+      health: asset.health,
+      status: asset.status,
+      power: asset.currentPower,
+      vibration: baseVib,
+      temperature: baseTemp,
+      revenueLossPerHour: asset.revenueLossPerHour,
+      rulDays: 42.0,
+      failureProbability: 18.5,
+    },
+    simulated: {
+      health: simHealth,
+      status: simStatus,
+      risk: simRisk,
+      power: simPower,
+      vibration: simVib,
+      temperature: simTemp,
+      windSpeed: simWind,
+      windCutOut,
+      rulDays: simRulDays,
+      failureProbability,
+      powerLossMW,
+      hourlyLossINR,
+      cumulative30DayLossINR,
+      catastrophicRepairRiskINR,
+      prescriptiveAction,
+    },
+    trajectory
+  };
+}
+
+// -------------------------------------------------------------
+// FEATURE 53: Forecast Studio Multi-Horizon Generation Engine
+// -------------------------------------------------------------
+function generateForecastData(assetId = "FLEET", horizon = "24h", modelType = "ensemble") {
+  const asset = assetId === "FLEET" ? null : store.assets.find(a => a.id === assetId);
+  const totalCapacity = asset ? asset.capacity : store.assets.reduce((sum, a) => sum + a.capacity, 0);
+  const isSolarOnly = asset ? asset.type === "SOLAR" : false;
+  const isWindOnly = asset ? asset.type === "WIND" : false;
+
+  let pointsCount = 24;
+  let stepMinutes = 60;
+
+  if (horizon === "6h") {
+    pointsCount = 24; // 24 blocks of 15 min = 6 hours
+    stepMinutes = 15;
+  } else if (horizon === "48h") {
+    pointsCount = 48;
+    stepMinutes = 60;
+  } else if (horizon === "7d") {
+    pointsCount = 28; // 7 days * 4 slots per day
+    stepMinutes = 360;
+  }
+
+  const now = new Date();
+  const series = [];
+
+  let totalMWh = 0;
+  let totalRevenueINR = 0;
+  let minGenerationVal = 999999;
+  let optimalWindowStart = null;
+  let optimalWindowEnd = null;
+
+  for (let i = 0; i < pointsCount; i++) {
+    const pointTime = new Date(now.getTime() + i * stepMinutes * 60 * 1000);
+    const hour = pointTime.getHours();
+    const minutes = pointTime.getMinutes();
+    const timeLabel = horizon === "7d" 
+      ? `${pointTime.toLocaleDateString("en-IN", { weekday: "short", day: "numeric" })} ${String(hour).padStart(2, '0')}:00`
+      : `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+    // Solar Diurnal curve
+    const solarFactor = (hour >= 6 && hour <= 18) 
+      ? Math.sin(((hour - 6) + (minutes / 60)) / 12 * Math.PI) 
+      : 0;
+    
+    // Wind Regime curve
+    const windSpeed = 8.5 + Math.sin((hour + 4) / 24 * 2 * Math.PI) * 3.8 + Math.cos(i / 3) * 0.8;
+    const windFactor = Math.min(1.0, Math.pow(Math.max(0, windSpeed - 3.0) / 9.0, 2.2));
+
+    // Base generation fraction
+    let genFraction = 0;
+    if (isSolarOnly) {
+      genFraction = Math.max(0, solarFactor);
+    } else if (isWindOnly) {
+      genFraction = Math.max(0.08, windFactor);
+    } else {
+      genFraction = Math.max(0.05, 0.48 * windFactor + 0.52 * solarFactor);
+    }
+
+    // Apply model variance
+    let modelMultiplier = 1.0;
+    if (modelType === "physics") modelMultiplier = 0.95 + Math.sin(i * 0.5) * 0.06;
+    else if (modelType === "ml") modelMultiplier = 1.02 + Math.cos(i * 0.4) * 0.05;
+    else if (modelType === "persistence") modelMultiplier = 0.91 + (i > 10 ? (i - 10) * 0.01 : 0);
+
+    const expectedPowerMW = Number((totalCapacity * genFraction * modelMultiplier).toFixed(2));
+    const optimisticPowerMW = Number((expectedPowerMW * 1.14 + 0.15).toFixed(2));
+    const pessimisticPowerMW = Number(Math.max(0, expectedPowerMW * 0.86 - 0.10).toFixed(2));
+
+    // Indian CERC Deviation Settlement Mechanism (DSM) Band (+/- 10%)
+    const dsmLowerLimitMW = Number((expectedPowerMW * 0.90).toFixed(2));
+    const dsmUpperLimitMW = Number((expectedPowerMW * 1.10).toFixed(2));
+
+    // Dynamic Indian Time-of-Day (ToD) Tariff
+    let tariffRate = 6.0;
+    if (hour >= 18 && hour <= 22) tariffRate = 7.80;
+    else if (hour >= 23 || hour <= 5) tariffRate = 4.50;
+    else if (hour >= 10 && hour <= 15) tariffRate = 5.60;
+
+    const blockHours = stepMinutes / 60;
+    const blockMWh = expectedPowerMW * blockHours;
+    const blockRevenueINR = Math.round(blockMWh * 1000 * tariffRate);
+
+    totalMWh += blockMWh;
+    totalRevenueINR += blockRevenueINR;
+
+    const ghi = Math.round(solarFactor * 980);
+    const ambientTemp = Number((28.5 + solarFactor * 10 + Math.sin(hour / 4) * 2).toFixed(1));
+
+    if (expectedPowerMW < minGenerationVal && (horizon !== "6h" || i >= 2)) {
+      minGenerationVal = expectedPowerMW;
+      optimalWindowStart = timeLabel;
+      optimalWindowEnd = new Date(pointTime.getTime() + 3 * 3600 * 1000).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    series.push({
+      time: timeLabel,
+      timestamp: pointTime.toISOString(),
+      expectedPowerMW,
+      optimisticPowerMW,
+      pessimisticPowerMW,
+      dsmLowerLimitMW,
+      dsmUpperLimitMW,
+      windSpeed: Number(windSpeed.toFixed(1)),
+      solarGHI: ghi,
+      ambientTemp,
+      tariffRate,
+      blockRevenueINR,
+    });
+  }
+
+  const optSavings = Math.round(totalCapacity * 1000 * 6.0 * 2.5 * 0.72);
+
+  return {
+    meta: {
+      assetId,
+      assetName: asset ? `${asset.id} (${asset.type})` : "Total Renewable Fleet (Wind + Solar)",
+      capacityMW: totalCapacity,
+      horizon,
+      modelType,
+      generatedAt: now.toISOString(),
+      mapeConfidencePct: modelType === "ensemble" ? 94.8 : modelType === "ml" ? 92.4 : modelType === "physics" ? 88.6 : 81.2,
+    },
+    summary: {
+      totalMWh: Number(totalMWh.toFixed(1)),
+      peakPowerMW: Number(Math.max(...series.map(s => s.expectedPowerMW)).toFixed(2)),
+      averagePowerMW: Number((series.reduce((s, p) => s + p.expectedPowerMW, 0) / series.length).toFixed(2)),
+      totalRevenueINR,
+      optimalMaintenanceWindow: {
+        startTime: optimalWindowStart || "02:00",
+        endTime: optimalWindowEnd || "06:00",
+        opportunityCostSavingsINR: optSavings,
+        recommendation: `Recommended low-generation window for preventative maintenance. Minimal generation curtailment during this window saves up to ₹${optSavings.toLocaleString('en-IN')} in lost generation.`,
+      }
+    },
+    series
+  };
+}
+
 // Request Helper
 function sendJson(res, statusCode, data) {
   res.writeHead(statusCode, {
@@ -358,6 +741,77 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 200, store.activity);
   }
 
+  // =========================================================================
+  // FEATURE 52: What-If Scenario Simulation Engine
+  // =========================================================================
+  if (path === "/api/what-if/presets" && method === "GET") {
+    return sendJson(res, 200, whatIfPresets);
+  }
+
+  if (path === "/api/what-if/simulate" && (method === "POST" || method === "GET")) {
+    let params = {};
+    if (method === "GET") {
+      params = {
+        assetId: parsedUrl.searchParams.get("assetId") || "WT-017",
+        temperatureOffset: Number(parsedUrl.searchParams.get("tempOffset") || 0),
+        windSpeedFactor: Number(parsedUrl.searchParams.get("windFactor") || 1.0),
+        irradianceFactor: Number(parsedUrl.searchParams.get("irradianceFactor") || 1.0),
+        soilingFactor: Number(parsedUrl.searchParams.get("soilingFactor") || 0),
+        curtailmentPct: Number(parsedUrl.searchParams.get("curtailmentPct") || 0),
+        maintenanceDelayDays: Number(parsedUrl.searchParams.get("delayDays") || 0),
+        deratePct: Number(parsedUrl.searchParams.get("deratePct") || 100),
+      };
+    } else {
+      let body = "";
+      for await (const chunk of req) body += chunk;
+      try { params = JSON.parse(body || "{}"); } catch { params = {}; }
+    }
+    const result = runWhatIfSimulation(params);
+    return sendJson(res, 200, result);
+  }
+
+  // =========================================================================
+  // FEATURE 53: Forecast Studio Multi-Horizon Generation Engine
+  // =========================================================================
+  if (path === "/api/forecast" && method === "GET") {
+    const assetId = parsedUrl.searchParams.get("assetId") || "FLEET";
+    const horizon = parsedUrl.searchParams.get("horizon") || "24h";
+    const modelType = parsedUrl.searchParams.get("model") || "ensemble";
+    const result = generateForecastData(assetId, horizon, modelType);
+    return sendJson(res, 200, result);
+  }
+
+  if (path === "/api/forecast/schedule-window" && method === "POST") {
+    let body = "";
+    for await (const chunk of req) body += chunk;
+    let data = {};
+    try { data = JSON.parse(body || "{}"); } catch { data = {}; }
+
+    const assetId = data.assetId || "WT-017";
+    const windowTime = data.windowTime || "02:00 - 06:00";
+    const newOrder = {
+      id: "WO-" + Math.floor(300 + Math.random() * 700),
+      assetId,
+      issue: `Optimal Forecast-Scheduled Maintenance (${windowTime})`,
+      priority: data.priority || "P2",
+      status: "INSPECTION",
+      technician: data.technician || "Aarav Mehta",
+      scheduledDate: data.scheduledDate || new Date(Date.now() + 86400000).toISOString().split("T")[0],
+      notes: `Scheduled during lowest-generation opportunity lull (${windowTime}) via Forecast Studio. Saves ~₹14,200 generation loss.`,
+      createdAt: new Date().toISOString(),
+    };
+    store.workOrders.unshift(newOrder);
+    store.activity.unshift({
+      id: store.activity.length + 1,
+      time: new Date().toLocaleTimeString("en-GB"),
+      title: `Forecast Studio scheduled maintenance ${newOrder.id} for ${assetId}`,
+      detail: `Allocated to ${newOrder.technician} in low-cost generation window`,
+      tone: "teal",
+      assetId,
+    });
+    return sendJson(res, 201, { success: true, order: newOrder });
+  }
+
   // Serve static files from artifacts/renewable-maintenance/dist/public
   const __dirname = nodePath.dirname(fileURLToPath(import.meta.url));
   const distDir = nodePath.resolve(__dirname, "dist");
@@ -375,7 +829,7 @@ const server = http.createServer(async (req, res) => {
       stat = fs.statSync(targetPath);
     }
   } catch {
-    if (method === "GET") {
+    if (method === "GET" || method === "HEAD") {
       targetPath = nodePath.join(distDir, "index.html");
       try {
         stat = fs.statSync(targetPath);
@@ -404,6 +858,10 @@ const server = http.createServer(async (req, res) => {
       "Content-Type": mimeTypes[ext] || "application/octet-stream",
       "Content-Length": stat.size,
     });
+    if (method === "HEAD") {
+      res.end();
+      return;
+    }
     return fs.createReadStream(targetPath).pipe(res);
   }
 
